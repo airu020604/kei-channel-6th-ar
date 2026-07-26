@@ -1,6 +1,6 @@
 body#all-body{
   margin:0;
-  height: 100%
+  height: 100%;
   overflow:hidden;
   background-color: black;
   color: white;
@@ -18,7 +18,7 @@ body#all-body p,H1,H2{
 
 
 #container {
-  width:100vw;
+  width:90vw;
   height:100dvh;
 }
 
