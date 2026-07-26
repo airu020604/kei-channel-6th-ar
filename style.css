@@ -1,0 +1,167 @@
+body#all-body{
+  margin:0;
+  padding: 100px;
+  overflow:hidden;
+  background-color: black;
+  color: white;
+  font-family:sans-serif;
+}
+
+body#all-body p,H1,H2{
+  margin:0;
+  padding: 0%;
+  overflow:hidden;
+  background-color: black;
+  color: white;
+  font-family:sans-serif;
+}
+
+
+#container {
+  width:100vw;
+  height:100dvh;
+}
+
+
+#menu{
+  position:fixed;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:5px;
+  z-index:100;
+}
+
+button{
+  width:240px;
+  height:55px;
+  font-size:20px;
+  cursor:pointer;
+  margin: 0;
+  border: none;
+  background: none;
+  padding: 0;
+  color: white;
+  display: inline-block;
+  position: relative;
+  text-decoration: none;
+  text-align:center;
+  line-height:55px;
+}
+
+button::after{
+	position: absolute;
+	content: '';
+	bottom: 0;
+	left: 0;
+	width: 0;
+	height: 1px;
+	background: #2196F3;
+	transition: all 0.3s ease 0s;
+}
+
+button:hover{
+  cursor: pointer;
+  display: block;
+}
+
+
+button:hover::after{
+	width: 100%;
+}
+
+
+  .button-text:hover + .on-p {
+    display: block;
+  }
+
+  .button-text {
+    position: relative;
+    width: 240px;
+    height: 55px;
+    margin: 0px;
+  }
+
+  .on-p {
+    display: none;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 0;
+    left: 25px;
+    color: #fff;
+    font-weight: bold;
+    line-height:55px;
+  }
+
+  .on-p:after {
+    position: absolute;
+    width: 0;
+    height: 0;
+    left: 0;
+    bottom: -19px;
+    margin-left: 10px;
+    pointer-events: none;
+    content: " ";
+  }
+
+  .button-text:hover + .on-p {
+    display: block;
+  }
+
+
+
+.slider {
+  position: relative;
+  width: 100px;
+  height: 10%;
+  overflow: hidden;
+  bottom: -25px;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  animation: fade 3s infinite;
+}
+
+.slide1 { background-image: url(./img/keineko001.png); animation-delay: 1s; }
+.slide2 { background-image: url(./img/keineko002.png); animation-delay: 2s; }
+.slide3 { background-image: url(./img/keineko003.png); animation-delay: 3s; }
+
+@keyframes fade {
+  0%, 30%   { opacity: 1; }
+  50%,100% { opacity: 0; }
+}
+
+
+#cameraUI{
+    position:fixed;
+    bottom:30px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:1000;
+}
+
+#captureBtn{
+
+    width:140px;
+    height:60px;
+
+    border:none;
+    border-radius:30px;
+
+    background:#ffffffee;
+
+    font-size:22px;
+
+    cursor:pointer;
+
+    box-shadow:0 4px 10px rgba(0,0,0,.3);
+
+}

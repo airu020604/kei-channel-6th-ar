@@ -1,15 +1,73 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-<meta charset="UTF-8">
-<title>KEI CHANNEL 6th AR</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+  <script type="importmap">
+    {"imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+    "mindar-image-three": "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js",
+    "@pixiv/three-vrm": "https://unpkg.com/@pixiv/three-vrm@2.1.1/lib/three-vrm.module.js"
+    }}
+  </script>
+
+
+  <script type="module" src="./scripts/script.js"></script>
+  <link rel="stylesheet" href="style.css">
+
+  <title>KEI CHANNEL 6th AR</title>
+
+  <div id="menu">
+
+<div class="slider">
+  <div class="slide slide1"></div>
+  <div class="slide slide2"></div>
+  <div class="slide slide3"></div>
+</div>
+
+
+
+
+
+    <p class="line-p">============================</p>
+    <h1>KEI CHANNEL</h1>
+    <p class="line-p">============================</p>
+    <h2>6th Anniversary AR</h2>
+    <p class="line-p">--------------------------------------------</p>
+    <button id="photoBtn"> 
+        <p class="button-text">📷 写真モード</p><p class="on-p">▶</p>
+    </button>
+
+    <button id="effectBtn">
+      <p class="button-text">✨ 演出モード</p><p class="on-p">▶</p>
+    </button>
+
+    <button id="startBtn">
+      <p class="button-text">Start</p><p class="on-p">▶</p>
+    </button>
+  </div>
+
+
 </head>
 
-<body>
+<body id="all-body">
 
-<h1>KEI CHANNEL 6th Anniversary</h1>
+  <div id="container"></div>
 
-<p>GitHub Pages公開成功！</p>
+  <div id="cameraUI">
+
+<button id="captureBtn" style="display:none;">
+    📷 撮影
+</button>
+
+</div>
 
 </body>
+
+
 </html>
