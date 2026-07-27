@@ -6,11 +6,10 @@ html{
 
 body#all-body{
   margin:0;
-  height: 100%;
+  width:100vw;
+  height:100dvh;
   overflow:hidden;
-  background-color: black;
-  color: white;
-  font-family:sans-serif;
+  background:black;
 }
 
 body#all-body p,H1,H2{
@@ -26,6 +25,8 @@ body#all-body p,H1,H2{
 #container{
     position:fixed;
     inset:0;
+    width:100vw;
+    height:100dvh;
 }
 
 

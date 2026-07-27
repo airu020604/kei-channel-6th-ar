@@ -146,6 +146,9 @@ isParticlePlaying = true;
   //anchor.group.add(cube);
   await mindarThree.start();
   animate(renderer, scene, camera);
+  console.log(document.body.clientHeight);
+console.log(window.innerHeight);
+console.log(document.querySelector("#container").clientHeight);
 };
 
 // ===== Cube作成関数 =====
