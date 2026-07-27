@@ -141,27 +141,32 @@ button:hover::after{
 
 
 #cameraUI{
-    position:fixed;
-    bottom:30px;
-    left:50%;
-    transform:translateX(-50%);
-    z-index:1000;
+    position: fixed;
+
+    left: 50%;
+    bottom: max(20px, env(safe-area-inset-bottom));
+
+    transform: translateX(-50%);
+
+    z-index: 99999;
+
+    pointer-events: none;
 }
 
 #captureBtn{
 
-    width:140px;
-    height:60px;
+    pointer-events: auto;
 
-    border:none;
-    border-radius:30px;
+    width: 140px;
+    height: 60px;
 
-    background:#ffffffee;
+    border-radius: 999px;
 
-    font-size:22px;
+    border: none;
 
-    cursor:pointer;
+    background: rgba(255,255,255,.9);
 
-    box-shadow:0 4px 10px rgba(0,0,0,.3);
+    font-size: 22px;
 
+    box-shadow: 0 5px 15px rgba(0,0,0,.35);
 }
