@@ -317,12 +317,11 @@ effectBtn.onclick = async () => {
 
     mode = "effect";
 
-    captureBtn.style.display = "none";
-
     document.querySelector("#menu").style.display = "none";
     document.querySelector("#container").style.display = "block";
 
     await start();
+    captureBtn.style.display = "none";
 
 };
 
