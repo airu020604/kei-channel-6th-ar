@@ -149,25 +149,18 @@ button:hover::after{
 #cameraUI{
     position:fixed;
     left:50%;
-    bottom:30px;
+    bottom:-100px;
     transform:translateX(-50%);
     z-index:99999;
 }
 
 #captureBtn{
-
     pointer-events: auto;
-
     width: 140px;
     height: 60px;
-
     border-radius: 999px;
-
     border: none;
-
     background: rgba(255,255,255,.9);
-
     font-size: 22px;
-
     box-shadow: 0 5px 15px rgba(0,0,0,.35);
 }
