@@ -303,13 +303,13 @@ photoBtn.onclick = async () => {
 
     mode = "photo";
 
-    captureBtn.style.display = "block";
 
     document.querySelector("#menu").style.display = "none";
     document.querySelector("#container").style.display = "block";
 
     await start();
 
+    captureBtn.style.display = "block";
 };
 
 
