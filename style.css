@@ -148,11 +148,21 @@ button:hover::after{
 
 
 #cameraUI{
-    position:fixed;
-    left:50%;
-    bottom:30px;
-    transform:translateX(-50%);
-    z-index:99999;
+    position: fixed;
+
+    left: 50%;
+    bottom: env(safe-area-inset-bottom);
+
+    transform: translateX(-50%);
+
+    z-index: 999999;
+
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+
+    pointer-events: none;
 }
 
 #captureBtn{
@@ -164,5 +174,6 @@ button:hover::after{
     background: rgba(255,255,255,.9);
     font-size: 22px;
     box-shadow: 0 5px 15px rgba(0,0,0,.35);
-    bottom: 100px;
+        pointer-events: auto;
+    margin-bottom: 25px;
 }
