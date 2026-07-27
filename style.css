@@ -17,9 +17,8 @@ body#all-body p,H1,H2{
 }
 
 
-#container {
-  width:90vw;
-  height:100dvh;    position:fixed;
+#container{
+    position:fixed;
     inset:0;
 }
 
@@ -142,16 +141,11 @@ button:hover::after{
 
 
 #cameraUI{
-    position: fixed;
-
-    left: 50%;
-    bottom: max(20px, env(safe-area-inset-bottom));
-
-    transform: translateX(-50%);
-
-    z-index: 99999;
-
-    pointer-events: none;
+    position:fixed;
+    left:50%;
+    bottom:30px;
+    transform:translateX(-50%);
+    z-index:99999;
 }
 
 #captureBtn{
