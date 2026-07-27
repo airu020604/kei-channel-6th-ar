@@ -145,6 +145,11 @@ isParticlePlaying = true;
   
   //anchor.group.add(cube);
   await mindarThree.start();
+document.getElementById("cameraUI").style.position = "fixed";
+document.getElementById("cameraUI").style.left = "50%";
+document.getElementById("cameraUI").style.bottom = "30px";
+document.getElementById("cameraUI").style.transform = "translateX(-50%)";
+
   animate(renderer, scene, camera);
   console.log(document.body.clientHeight);
 console.log(window.innerHeight);
