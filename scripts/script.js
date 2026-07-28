@@ -145,6 +145,14 @@ isParticlePlaying = true;
   
   //anchor.group.add(cube);
   await mindarThree.start();
+const container = document.getElementById("container");
+
+console.log(container.clientHeight);
+console.log(window.innerHeight);
+
+container.style.border = "5px solid red";
+
+
 document.getElementById("cameraUI").style.position = "fixed";
 document.getElementById("cameraUI").style.left = "50%";
 document.getElementById("cameraUI").style.bottom = "300px";

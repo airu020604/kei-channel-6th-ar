@@ -145,17 +145,7 @@ button:hover::after{
 }
 
 
-#cameraUI{
-    position:absolute;
-    left:0;
-    right:0;
-    bottom:30px;
 
-    display:flex;
-    justify-content:center;
-
-    z-index:9999;
-}
 
 #captureBtn{
     pointer-events: auto;
@@ -168,4 +158,22 @@ button:hover::after{
     box-shadow: 0 5px 15px rgba(0,0,0,.35);
         pointer-events: auto;
     margin-bottom: 25px;
+}
+
+
+
+#container video,
+#container canvas{
+    position:absolute !important;
+    inset:0 !important;
+    width:100% !important;
+    height:100% !important;
+}
+
+#cameraUI{
+    position:fixed !important;
+    left:50% !important;
+    bottom:30px !important;
+    transform:translateX(-50%) !important;
+    z-index:999999 !important;
 }
