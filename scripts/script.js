@@ -16,9 +16,6 @@ let appearTime = 0;
 let isAppearing = false;
 let isTracking = false;
 let renderer;
-let particles = [];
-let particleStartTime = 0;
-let isParticlePlaying = false;
 let mode = "photo";
 let currentState;
 let idleBaseY = -0.6;
@@ -26,6 +23,8 @@ let blinkTimer = 0;
 
 let mixer = null;
 let animationAction = null;
+
+
 
 // ===== 変化しない変数の設定 =====
 const clock = new THREE.Clock();
@@ -59,11 +58,17 @@ const start = async () => {
     imageTargetSrc: "./targets/targets.mind"
   });
 
+
   const renderData = mindarThree;
   renderer = renderData.renderer;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
   const scene = renderData.scene;
   const camera = renderData.camera;
+
   renderer.preserveDrawingBuffer = true;
+
   
   // ===== ライト設定関数 =====
   createLight(scene);
@@ -71,63 +76,53 @@ const start = async () => {
   // ===== マーカー0番 =====
   const anchor = mindarThree.addAnchor(0);
 
-  createParticles(anchor);
 
   anchor.onTargetFound = () => {
-for (const p of particles) {
+  vrm.scene.visible = true;
+  particleStartTime = clock.getElapsedTime();
 
-    p.visible = true;
+  if (!vrm) return;
+    if (isTracking) return;
+      isTracking = true;
+      appearTime = 0;
+      vrm.scene.visible = true;
 
-    // 初期位置へ戻す
-    p.position.set(0, 0.2, 0);
+      vrm.scene.position.set(0, -0.8, 0);
+      vrm.scene.scale.set(0.6, 0.6, 0.6);
+      vrm.lookAt = null;
 
-    // 大きさを戻す
-    p.scale.set(1, 1, 1);
+      vrm.scene.traverse((obj) => {
 
-    // 透明度を戻す
-    p.material.opacity = 1;
+        if (!obj.isMesh) return;
+        const name = obj.name.toLowerCase();
 
-    // 新しい速度を毎回設定
-    p.userData.velocity.set(
-        (Math.random() - 0.5) * 0.06,
-        Math.random() * 0.08 + 0.02,
-        (Math.random() - 0.5) * 0.06
-    );
+    // 目・顔は透明化しない
+       if (
+        name.includes("eye") ||
+        name.includes("face")
+       ) {
+        return;
+      }
+
+    obj.material.transparent = true;
+    //obj.material.opacity = 0;
+
+    if (animationAction) {
+
+    animationAction.reset();
+
+    animationAction.play();
 
 }
 
-particleStartTime = clock.getElapsedTime();
-
-isParticlePlaying = true;
-
-    if (!vrm) return;
-    if (isTracking) return;
-    isTracking = true;
-
-    appearTime = 0;
-    isAppearing = true;
-
-    vrm.scene.position.set(0, -0.8, 0);
-    vrm.scene.scale.set(0.6, 0.6, 0.6);
-
-    vrm.scene.traverse((obj) => {
-      if (obj.isMesh) {
-        obj.material.opacity = 0;
-      }
-    });
+});
 
 
 
   };
 
   anchor.onTargetLost = () => {
-    if (!vrm) return;
-    isTracking = false;
-    vrm.scene.traverse((obj) => {
-      if (obj.isMesh) {
-        obj.material.opacity = 0;
-      }
-    });
+  vrm.scene.visible = false;
   };
 
 
@@ -155,9 +150,25 @@ function createCube() {
 }
 
 // ===== ライト設定関数 =====
-function createLight(scene) {
-  const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
-  scene.add(light);
+function createLight(scene){
+
+    const hemi = new THREE.HemisphereLight(
+        0xffffff,
+        0x666666,
+        2
+    );
+
+    scene.add(hemi);
+
+    const dir = new THREE.DirectionalLight(
+        0xffffff,
+        3
+    );
+
+    dir.position.set(0,3,2);
+
+    scene.add(dir);
+
 }
 
 
@@ -169,19 +180,26 @@ function loadVRM(anchor) {
     loader.load("./models/kei.vrm",
       (gltf) => {
         vrm = gltf.userData.vrm;
+if (vrm.lookAt) {
+    vrm.lookAt.autoUpdate = false;
+}
+
         vrm.scene.scale.set(1, 1, 1);
         vrm.scene.position.set(0, -0.6, 0);
         idleBaseY = -0.6;
         vrm.scene.rotation.y = Math.PI;
 
         vrm.scene.traverse((obj) => {
-          if (obj.isMesh) {
-           obj.material.transparent = true;
-           obj.material.opacity = 0;
-          }
+
+          if (obj.material) {
+
+    obj.material.needsUpdate = true;
+
+}
         });
 
         anchor.group.add(vrm.scene);
+        vrm.scene.visible = false;
         resolve();
       },
       undefined,
@@ -209,6 +227,21 @@ async function loadVRMA() {
     mixer = new THREE.AnimationMixer(vrm.scene);
 
     animationAction = mixer.clipAction(clip);
+    animationAction.reset();
+
+animationAction.setLoop(THREE.LoopOnce, 1);
+
+animationAction.clampWhenFinished = true;
+
+animationAction.enabled = true;
+
+animationAction.play();
+
+animationAction.setLoop(
+    THREE.LoopOnce,
+    1
+);
+
 
     animationAction.play();
 
@@ -221,34 +254,11 @@ function animate(renderer, scene, camera) {
 
     const delta = clock.getDelta();
 
-    // パーティクル更新
-    if (isParticlePlaying) {
 
-    const t = clock.getElapsedTime() - particleStartTime;
 
-    for (const p of particles) {
 
-        p.position.add(p.userData.velocity);
-        p.userData.velocity.multiplyScalar(0.96);
-        p.material.opacity = 1 - t;
-        p.scale.multiplyScalar(1.01);
 
-    }
 
-    if (t > 1) {
-
-        for (const p of particles) {
-            p.scale.set(1,1,1);
-            p.visible = false;
-
-        }
-
-        isParticlePlaying = false;
-
-    }
-    
-
-}
 
 if (mixer) {
 
@@ -262,33 +272,12 @@ if (mixer) {
       vrm.update(delta);
       
 
+if(vrm){
 
-      if (isAppearing) {
-
-        appearTime += delta;
-
-        const t = Math.min(appearTime / 1.5, 1);
-        const ease = 1 - Math.pow(1 - t, 3);
-
-        vrm.scene.position.y = -0.8 + (0.2 * ease);
-
-        const scale = 0.6+ (0.10 * ease);
-        vrm.scene.scale.set(scale, scale, scale);
-
-        vrm.scene.traverse((obj) => {
-          if (obj.isMesh) {
-            obj.material.opacity = ease;
-          }
-        });
-
-if (t >= 1) {
-
-    isAppearing = false;
-
-    idleBaseY = vrm.scene.position.y;
+    vrm.update(delta);
 
 }
-      }
+
     }
 
     renderer.render(scene, camera);
@@ -296,47 +285,6 @@ if (t >= 1) {
   });
 
 }
-
-
-
-function createParticles(anchor) {
-
-    particles = [];
-
-    for (let i = 0; i < 30; i++) {
-
-        const particle = new THREE.Mesh(
-
-            new THREE.SphereGeometry(0.02, 8, 8),
-
-            new THREE.MeshBasicMaterial({
-                color: 0xffdd66,
-                transparent: true,
-                opacity: 1
-            })
-
-        );
-
-        particle.visible = false;
-
-        particle.userData.velocity = new THREE.Vector3(
-          (Math.random() - 0.5) * 0.06,
-          Math.random() * 0.08 + 0.02,
-          (Math.random() - 0.5) * 0.06
-        );
-
-        anchor.group.add(particle);
-
-        particles.push(particle);
-
-    }
-
-}
-
-
-
-
-
 
 
 
