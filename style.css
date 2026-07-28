@@ -156,24 +156,9 @@ button:hover::after{
     background: rgba(255,255,255,.9);
     font-size: 22px;
     box-shadow: 0 5px 15px rgba(0,0,0,.35);
-        pointer-events: auto;
+    pointer-events: auto;
     margin-bottom: 25px;
 }
 
 
 
-#container video,
-#container canvas{
-    position:absolute !important;
-    inset:0 !important;
-    width:100% !important;
-    height:100% !important;
-}
-
-#cameraUI{
-    position:fixed !important;
-    left:50% !important;
-    bottom:30px !important;
-    transform:translateX(-50%) !important;
-    z-index:999999 !important;
-}

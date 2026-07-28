@@ -1,22 +1,33 @@
-//各種インポート
+// ===== 各種インポート =====
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { VRMLoaderPlugin } from "@pixiv/three-vrm";
 import { MindARThree } from "mindar-image-three";
 
-//グローバル変数
+import {
+  VRMAnimationLoaderPlugin,
+  createVRMAnimationClip
+} from "@pixiv/three-vrm-animation";
+
+
+// ===== グローバル変数 =====
 let vrm = null;
 let appearTime = 0;
 let isAppearing = false;
 let isTracking = false;
 let renderer;
-
 let particles = [];
 let particleStartTime = 0;
 let isParticlePlaying = false;
-
 let mode = "photo";
+let currentState;
+let idleBaseY = -0.6;
+let blinkTimer = 0;
 
+let mixer = null;
+let animationAction = null;
+
+// ===== 変化しない変数の設定 =====
 const clock = new THREE.Clock();
 
 const State = {
@@ -26,7 +37,6 @@ const State = {
   EFFECT: 3
 };
 
-
 const Motion = {
   DANCE: "dance",
   WAVE: "wave",
@@ -34,23 +44,11 @@ const Motion = {
 }
 //playMotion(Motion.DANCE);
 
-let currentState = State.HIDDEN;
+currentState = State.HIDDEN;
 
 const photoBtn = document.querySelector("#photoBtn");
 const effectBtn = document.querySelector("#effectBtn");
 const startBtn = document.querySelector("#startBtn");
-
-
-
-
-
-//const width = 1080; // 写真の幅をこのサイズに変倍する
-//let height = 0; // これは入力ストリームに基づいて計算される
-
-//let streaming = false;
-
-
-
 
 
 //スタート
@@ -61,17 +59,14 @@ const start = async () => {
     imageTargetSrc: "./targets/targets.mind"
   });
 
-const renderData = mindarThree;
-
-renderer = renderData.renderer;
-const scene = renderData.scene;
-const camera = renderData.camera;
+  const renderData = mindarThree;
+  renderer = renderData.renderer;
+  const scene = renderData.scene;
+  const camera = renderData.camera;
   renderer.preserveDrawingBuffer = true;
   
   // ===== ライト設定関数 =====
   createLight(scene);
-
- 
 
   // ===== マーカー0番 =====
   const anchor = mindarThree.addAnchor(0);
@@ -113,7 +108,7 @@ isParticlePlaying = true;
     isAppearing = true;
 
     vrm.scene.position.set(0, -0.8, 0);
-    vrm.scene.scale.set(0.35, 0.35, 0.35);
+    vrm.scene.scale.set(0.6, 0.6, 0.6);
 
     vrm.scene.traverse((obj) => {
       if (obj.isMesh) {
@@ -142,28 +137,12 @@ isParticlePlaying = true;
 
   // ===== VRM読み込み関数 =====
   await loadVRM(anchor);
+
+  await loadVRMA();
   
   //anchor.group.add(cube);
   await mindarThree.start();
-const container = document.getElementById("container");
-
-console.log(container.clientHeight);
-console.log(window.innerHeight);
-
-container.style.border = "5px solid red";
-
-
-document.getElementById("cameraUI").style.position = "fixed";
-document.getElementById("cameraUI").style.left = "50%";
-document.getElementById("cameraUI").style.bottom = "300px";
-document.getElementById("cameraUI").style.transform = "translateX(-50%)";
-console.log(renderer.domElement.style.height);
-console.log(renderer.domElement.style.width);
-console.log(window.innerHeight);
-console.log(document.querySelector("#container").getBoundingClientRect());
-
   animate(renderer, scene, camera);
-
 };
 
 // ===== Cube作成関数 =====
@@ -192,6 +171,7 @@ function loadVRM(anchor) {
         vrm = gltf.userData.vrm;
         vrm.scene.scale.set(1, 1, 1);
         vrm.scene.position.set(0, -0.6, 0);
+        idleBaseY = -0.6;
         vrm.scene.rotation.y = Math.PI;
 
         vrm.scene.traverse((obj) => {
@@ -208,6 +188,30 @@ function loadVRM(anchor) {
       reject
     );
   });
+}
+
+
+
+async function loadVRMA() {
+
+    const loader = new GLTFLoader();
+
+    loader.register((parser) => {
+        return new VRMAnimationLoaderPlugin(parser);
+    });
+
+    const gltf = await loader.loadAsync("./motions/idle.vrma");
+
+    const vrmAnimation = gltf.userData.vrmAnimations[0];
+
+    const clip = createVRMAnimationClip(vrmAnimation, vrm);
+
+    mixer = new THREE.AnimationMixer(vrm.scene);
+
+    animationAction = mixer.clipAction(clip);
+
+    animationAction.play();
+
 }
 
 
@@ -242,6 +246,13 @@ function animate(renderer, scene, camera) {
         isParticlePlaying = false;
 
     }
+    
+
+}
+
+if (mixer) {
+
+    mixer.update(delta);
 
 }
 
@@ -249,6 +260,8 @@ function animate(renderer, scene, camera) {
     if (vrm) {
 
       vrm.update(delta);
+      
+
 
       if (isAppearing) {
 
@@ -259,7 +272,7 @@ function animate(renderer, scene, camera) {
 
         vrm.scene.position.y = -0.8 + (0.2 * ease);
 
-        const scale = 0.35 + (0.10 * ease);
+        const scale = 0.6+ (0.10 * ease);
         vrm.scene.scale.set(scale, scale, scale);
 
         vrm.scene.traverse((obj) => {
@@ -268,9 +281,13 @@ function animate(renderer, scene, camera) {
           }
         });
 
-        if (t >= 1) {
-          isAppearing = false;
-        }
+if (t >= 1) {
+
+    isAppearing = false;
+
+    idleBaseY = vrm.scene.position.y;
+
+}
       }
     }
 
@@ -317,10 +334,15 @@ function createParticles(anchor) {
 }
 
 
+
+
+
+
+
+
 photoBtn.onclick = async () => {
 
     mode = "photo";
-
 
     document.querySelector("#menu").style.display = "none";
     document.querySelector("#container").style.display = "block";
@@ -328,8 +350,8 @@ photoBtn.onclick = async () => {
     await start();
 
     captureBtn.style.display = "block";
-};
 
+};
 
 effectBtn.onclick = async () => {
 
@@ -339,27 +361,7 @@ effectBtn.onclick = async () => {
     document.querySelector("#container").style.display = "block";
 
     await start();
+
     captureBtn.style.display = "none";
 
-};
-
-
-
-startBtn.onclick = async () => {
-
-photoBtn.onclick = () => {
-
-    const link = document.createElement("a");
-
-    link.download = "KeiAR.png";
-
-    link.href = renderer.domElement.toDataURL("image/png");
-
-    link.click();
-
-};
-
-  document.querySelector("#menu").style.display = "none";
-  document.querySelector("#container").style.display = "block";
-  await start();
 };

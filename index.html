@@ -4,42 +4,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
+  <script type="module" src="./scripts/script.js"></script>
+  <link rel="stylesheet" href="style.css">
 
   <script type="importmap">
     {"imports": {
     "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
     "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
     "mindar-image-three": "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js",
-    "@pixiv/three-vrm": "https://unpkg.com/@pixiv/three-vrm@2.1.1/lib/three-vrm.module.js"
+    "@pixiv/three-vrm": "https://unpkg.com/@pixiv/three-vrm@2.1.1/lib/three-vrm.module.js",
+    "@pixiv/three-vrm-animation":"https://unpkg.com/@pixiv/three-vrm-animation@2.1.1/lib/three-vrm-animation.module.js"
     }}
   </script>
-
-
-  <script type="module" src="./scripts/script.js"></script>
-  <link rel="stylesheet" href="style.css">
-
+ 
   <title>KEI CHANNEL 6th AR</title>
 </head>
+<body id="all-body">
+
 
   <div id="menu">
-
-<div class="slider">
-  <div class="slide slide1"></div>
-  <div class="slide slide2"></div>
-  <div class="slide slide3"></div>
-</div>
-
-
-
-
+    <div class="slider">
+      <div class="slide slide1"></div>
+      <div class="slide slide2"></div>
+      <div class="slide slide3"></div>
+    </div>
 
     <p class="line-p">============================</p>
     <h1>KEI CHANNEL</h1>
     <p class="line-p">============================</p>
     <h2>6th Anniversary AR</h2>
-    <p class="line-p">0--------------------------------------------</p>
+    <p class="line-p">--------------------------------------------</p>
     <button id="photoBtn"> 
         <p class="button-text">📷 写真モード</p><p class="on-p">▶</p>
     </button>
@@ -53,21 +47,13 @@
     </button>
   </div>
 
-
-
-
-<body id="all-body">
-
   <div id="container">
-
-  <div id="cameraUI">
-    <button id="captureBtn" style="display:none;">
-    📷 撮影
-    </button>
-  </div>
+    <div id="cameraUI">
+      <button id="captureBtn" style="display:none;">
+      📷 撮影B
+      </button>
+    </div>
   </div>
 
 </body>
-
-
 </html>
