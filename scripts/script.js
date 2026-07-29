@@ -153,9 +153,8 @@ const start = async () => {
 
   // ===== ターゲットを見失った時 =====
   anchor.onTargetLost = () => {
-    if (!worldLocked) {
-      vrm.scene.visible = false;
-    }
+    vrm.scene.visible = false;
+    isTracking = false;
   };
 
   // ===== Cube作成関数 =====
@@ -261,7 +260,17 @@ async function loadVRMA() {
 
   mixer = new THREE.AnimationMixer(vrm.scene);
   animationAction = mixer.clipAction(clip);
-  animationAction.reset();
+
+  if(animationAction){
+    vrm.humanoid?.resetNormalizedPose();
+    vrm.springBoneManager?.reset();
+    animationAction.stop();
+    animationAction.reset();
+    mixer.setTime(0);
+    animationAction.play();
+  }
+
+
   animationAction.setLoop(THREE.LoopOnce, 1);
   animationAction.clampWhenFinished = true;
   animationAction.enabled = true;
