@@ -79,9 +79,17 @@ const startBtn = document.querySelector("#startBtn");
 const start = async () => {
   
   const mindarThree = new MindARThree({
+    
     container: document.querySelector("#container"),
-    imageTargetSrc: "./targets/targets.mind"
+    imageTargetSrc: "./targets/targets.mind",
+        cameraConfig:{
+        facingMode:"environment",
+        width:1920,
+        height:1080
+    }
   });
+
+  
 
   const renderData = mindarThree;
   renderer = renderData.renderer;
@@ -90,6 +98,8 @@ const start = async () => {
   renderer.toneMappingExposure = 1.0;
   const scene = renderData.scene;
   const camera = renderData.camera;
+
+  
 
   renderer.preserveDrawingBuffer = true;
 
