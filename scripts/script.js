@@ -40,6 +40,10 @@ let currentScale = 1.0;
 let pinchDistance = 0;
 let lastScale = 1;
 let smoothRoot = null;
+let anchor = null;
+
+const targetPos = new THREE.Vector3();
+const targetQuat = new THREE.Quaternion();
 
 
 
@@ -94,7 +98,7 @@ const start = async () => {
   createLight(scene);
 
   // ===== マーカー0番 =====
-  const anchor = mindarThree.addAnchor(0);
+  anchor = mindarThree.addAnchor(0);
 
 
 //
@@ -111,7 +115,7 @@ const start = async () => {
     appearTime = 0;
     vrm.scene.visible = true;
     //vrm.scene.position.set(0, -0.4, 0);
-    vrm.scene.scale.set(1, 1, 1);
+    //vrm.scene.scale.set(1, 1, 1);
     vrm.lookAt = null;
     vrm.scene.traverse((obj) => {
 
@@ -285,7 +289,9 @@ smoothRoot.add(modelRoot);
 anchor.group.add(smoothRoot);
 
 
-        //vrm.scene.visible = false;
+        vrm.scene.visible = true;
+        vrm.scene.position.set(0, -0.8, 0);
+        vrm.scene.scale.set(1,1,1);
         resolve();
       },
       undefined,
@@ -359,20 +365,12 @@ function animate(renderer, scene, camera) {
     renderer.render(scene, camera);
   });
 
+anchor.group.getWorldPosition(targetPos);
+anchor.group.getWorldQuaternion(targetQuat);
 
-if (smoothRoot) {
+modelRoot.position.lerp(targetPos, 0.15);
+modelRoot.quaternion.slerp(targetQuat, 0.15);
 
-    smoothRoot.position.lerp(
-        anchor.group.position,
-        0.2
-    );
-
-    smoothRoot.quaternion.slerp(
-        anchor.group.quaternion,
-        0.2
-    );
-
-}
 console.log(clock.getDelta());
 }
 // ===== アニメーション関数 End =====
