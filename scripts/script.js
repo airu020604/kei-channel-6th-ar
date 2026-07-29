@@ -341,6 +341,7 @@ function setupInput() {
 
 
   container.addEventListener("touchstart", (e) => {
+    e.preventDefault();
     if (e.touches.length === 1) {
       isDragging = true;
       previousTouchX = e.touches[0].clientX;
@@ -351,9 +352,10 @@ function setupInput() {
     
     isDragging = true;
     previousTouchX = e.touches[0].clientX;
-  });
+  },{ passive:false });
 
 container.addEventListener("touchmove", (e) => {
+  e.preventDefault();
   if (!rotateRoot) return;
   if (e.touches.length === 1) {
     if (!isDragging) return;
@@ -369,8 +371,8 @@ container.addEventListener("touchmove", (e) => {
     currentScale += diff * 0.003;
     currentScale = Math.max(0.5, Math.min(2.5, currentScale));
   }
-
-});
+console.log(e.touches.length);
+}, { passive:false });
 
 
   container.addEventListener("touchend", () => {
