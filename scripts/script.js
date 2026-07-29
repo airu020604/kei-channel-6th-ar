@@ -32,6 +32,9 @@ let previousMouseX = 0;
 let rotationY = 0;
 let previousTouchX = 0;
 
+let currentScale = 1.0;
+let pinchDistance = 0;
+
 
 const lockedPosition = new THREE.Vector3();
 const lockedQuaternion = new THREE.Quaternion();
@@ -169,6 +172,7 @@ const start = async () => {
 };
 // ===== スタート関数 End =====
 
+
 // ===== Cube作成関数 =====
 function createCube() {
   const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
@@ -177,6 +181,7 @@ function createCube() {
   cube.position.set(-0.5, 0.25, 0);
   return cube;
 }
+
 
 // ===== ライト設定関数 Start =====
 function createLight(scene){
@@ -272,9 +277,10 @@ function animate(renderer, scene, camera) {
       mixer.update(delta);
     }
 
-    if (rotateRoot) {
-      rotateRoot.rotation.y = rotationY;
-    }
+  if (rotateRoot) {
+    rotateRoot.rotation.y = rotationY;
+    rotateRoot.scale.setScalar(currentScale);
+  }
     // VRM更新
     if (vrm) {
       vrm.update(delta);
@@ -303,72 +309,73 @@ effectBtn.onclick = async () => {
 
 
 
+function getTouchDistance(touches) {
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+
+
+
 function setupInput() {
-
-    const container = document.querySelector("#container");
-
-    container.style.touchAction = "none";
-
-    container.addEventListener("mousedown", (e) => {
-
-        isDragging = true;
-        previousMouseX = e.clientX;
-
-    });
-
-    window.addEventListener("mouseup", () => {
-
-        isDragging = false;
-
-    });
-
-    window.addEventListener("mousemove", (e) => {
-
-        if (!isDragging) return;
-        if (!rotateRoot) return;
-
-        const dx = e.clientX - previousMouseX;
-
-        previousMouseX = e.clientX;
-
-        rotationY += dx * 0.01;
-        console.log("rotation", rotationY);
-
-    });
-
-
-
-container.addEventListener("touchstart", (e) => {
-
-    if (e.touches.length !== 1) return;
-
+  const container = document.querySelector("#container");
+  container.style.touchAction = "none";
+  container.addEventListener("mousedown", (e) => {
     isDragging = true;
+    previousMouseX = e.clientX;
+  });
 
-    previousTouchX = e.touches[0].clientX;
+  window.addEventListener("mouseup", () => {
+    isDragging = false;
+  });
 
-});
-
-container.addEventListener("touchmove", (e) => {
-
+  window.addEventListener("mousemove", (e) => {
     if (!isDragging) return;
     if (!rotateRoot) return;
-    if (e.touches.length !== 1) return;
-
-    const dx = e.touches[0].clientX - previousTouchX;
-
-    previousTouchX = e.touches[0].clientX;
-
+    const dx = e.clientX - previousMouseX;
+    previousMouseX = e.clientX;
     rotationY += dx * 0.01;
+    console.log("rotation", rotationY);
+  });
+
+
+  container.addEventListener("touchstart", (e) => {
+    if (e.touches.length === 1) {
+      isDragging = true;
+      previousTouchX = e.touches[0].clientX;
+    }
+    if (e.touches.length === 2) {
+      pinchDistance = getTouchDistance(e.touches);
+    }
+    
+    isDragging = true;
+    previousTouchX = e.touches[0].clientX;
+  });
+
+container.addEventListener("touchmove", (e) => {
+  if (!rotateRoot) return;
+  if (e.touches.length === 1) {
+    if (!isDragging) return;
+    const dx = e.touches[0].clientX - previousTouchX;
+    previousTouchX = e.touches[0].clientX;
+    rotationY += dx * 0.01;
+  }
+
+  if (e.touches.length === 2) {
+    const newDistance = getTouchDistance(e.touches);
+    const diff = newDistance - pinchDistance;
+    pinchDistance = newDistance;
+    currentScale += diff * 0.003;
+    currentScale = Math.max(0.5, Math.min(2.5, currentScale));
+  }
 
 });
 
 
-container.addEventListener("touchend", () => {
-
+  container.addEventListener("touchend", () => {
     isDragging = false;
-
-});
-
+  });
 
 }
 
