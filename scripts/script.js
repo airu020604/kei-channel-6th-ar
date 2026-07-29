@@ -346,7 +346,7 @@ function animate(renderer, scene, camera) {
     }
     // VRM更新
     if (vrm) {
-      vrm.update(delta);
+      //vrm.update(delta);
     }
     renderer.render(scene, camera);
   });
