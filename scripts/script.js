@@ -85,7 +85,6 @@ const start = async () => {
   const camera = renderData.camera;
 
   renderer.preserveDrawingBuffer = true;
-  renderer.domElement.style.pointerEvents = "none";
 
   
   // ===== ライト設定関数 呼び出し =====
@@ -108,7 +107,7 @@ const start = async () => {
     isTracking = true;
     appearTime = 0;
     vrm.scene.visible = true;
-    vrm.scene.position.set(0, -0.8, 0);
+    vrm.scene.position.set(0, -0.4, 0);
     vrm.scene.scale.set(1, 1, 1);
     vrm.lookAt = null;
     vrm.scene.traverse((obj) => {
