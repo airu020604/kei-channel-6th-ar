@@ -283,8 +283,17 @@ function animate(renderer, scene, camera) {
     }
 
   if (rotateRoot) {
-    rotateRoot.rotation.y = rotationY;
-    rotateRoot.rotation.x = rotationX;
+    rotateRoot.rotation.y = THREE.MathUtils.lerp(
+      rotateRoot.rotation.y,
+      rotationY,
+      0.2
+    );
+
+    rotateRoot.rotation.x = THREE.MathUtils.lerp(
+      rotateRoot.rotation.x,
+      rotationX,
+      0.2
+    );
     rotateRoot.scale.setScalar(currentScale);
   }
     // VRM更新
