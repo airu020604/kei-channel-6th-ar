@@ -37,6 +37,8 @@ let previousTouchY = 0;
 let previousMouseY = 0;
 let currentScale = 1.0;
 
+let pinchDistance = 0;
+
 
 
 
@@ -295,6 +297,18 @@ function animate(renderer, scene, camera) {
 // ===== アニメーション関数 End =====
 
 
+
+function getDistance(touches){
+
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+
+    return Math.sqrt(dx * dx + dy * dy);
+
+}
+
+
+
 photoBtn.onclick = async () => {
   mode = "photo";
   document.querySelector("#menu").style.display = "none";
@@ -354,7 +368,20 @@ function setupInput() {
 
   container.addEventListener("touchstart", (e) => {
 
-    if (e.touches.length !== 1) return;
+  if (e.touches.length === 1){
+
+    isDragging = true;
+
+    previousTouchX = e.touches[0].clientX;
+    previousTouchY = e.touches[0].clientY;
+
+}
+
+if (e.touches.length === 2){
+
+    pinchDistance = getDistance(e.touches);
+
+}
 
     isDragging = true;
 
@@ -364,6 +391,23 @@ function setupInput() {
   }, { passive:false });
 
   container.addEventListener("touchmove", (e) => {
+
+    if (e.touches.length === 2){
+      const distance = getDistance(e.touches);
+      const diff = distance - pinchDistance;
+      pinchDistance = distance;
+      currentScale += diff * 0.003;
+      currentScale = Math.max(
+        0.5,
+        Math.min(
+          3,
+          currentScale
+        )
+      );
+    return;
+  }
+
+
 
     e.preventDefault();
 
@@ -383,10 +427,15 @@ function setupInput() {
   }, { passive:false });
 
 
-  container.addEventListener("touchend", () => {
-    isDragging = false;
-  });
+container.addEventListener("touchend", (e)=>{
 
+    if(e.touches.length===0){
+
+        isDragging=false;
+
+    }
+
+});
 
 }
 
