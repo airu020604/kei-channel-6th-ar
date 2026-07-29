@@ -250,7 +250,7 @@ function createLight(scene){
 
 // ===== VRM読み込み関数 Start =====
 function loadVRM(anchor) {
-  vrm.scene.position.set(0, -0.8, 0);
+
   return new Promise((resolve, reject) => {
     const loader = new GLTFLoader();
     loader.register(parser => new VRMLoaderPlugin(parser));
@@ -271,7 +271,7 @@ function loadVRM(anchor) {
           obj.material.needsUpdate = true;
         }
       });
-
+vrm.scene.position.set(0, -0.8, 0);
 smoothRoot = new THREE.Group();
 
 modelRoot = new THREE.Group();
