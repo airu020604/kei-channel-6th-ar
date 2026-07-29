@@ -33,7 +33,7 @@ let rotationY = 0;
 let previousTouchX = 0;
 
 let currentScale = 1.0;
-let pinchDistance = 0;
+
 
 
 const lockedPosition = new THREE.Vector3();
@@ -279,6 +279,11 @@ function animate(renderer, scene, camera) {
 
   if (rotateRoot) {
     rotateRoot.rotation.y = rotationY;
+    rotateRoot.scale.set(
+    currentScale,
+    currentScale,
+    currentScale
+    );
     rotateRoot.scale.setScalar(currentScale);
   }
     // VRM更新
@@ -309,11 +314,6 @@ effectBtn.onclick = async () => {
 
 
 
-function getTouchDistance(touches) {
-  const dx = touches[0].clientX - touches[1].clientX;
-  const dy = touches[0].clientY - touches[1].clientY;
-  return Math.sqrt(dx * dx + dy * dy);
-}
 
 
 
@@ -341,43 +341,46 @@ function setupInput() {
 
 
   container.addEventListener("touchstart", (e) => {
-    e.preventDefault();
-    if (e.touches.length === 1) {
-      isDragging = true;
-      previousTouchX = e.touches[0].clientX;
-    }
-    if (e.touches.length === 2) {
-      pinchDistance = getTouchDistance(e.touches);
-    }
-    
+
+    if (e.touches.length !== 1) return;
+
     isDragging = true;
-    previousTouchX = e.touches[0].clientX;
-  },{ passive:false });
 
-container.addEventListener("touchmove", (e) => {
-  e.preventDefault();
-  if (!rotateRoot) return;
-  if (e.touches.length === 1) {
+    previousTouchX = e.touches[0].clientX;
+
+  }, { passive:false });
+
+  container.addEventListener("touchmove", (e) => {
+
+    e.preventDefault();
+
+    if (!rotateRoot) return;
+
     if (!isDragging) return;
-    const dx = e.touches[0].clientX - previousTouchX;
-    previousTouchX = e.touches[0].clientX;
-    rotationY += dx * 0.01;
-  }
 
-  if (e.touches.length === 2) {
-    const newDistance = getTouchDistance(e.touches);
-    const diff = newDistance - pinchDistance;
-    pinchDistance = newDistance;
-    currentScale += diff * 0.003;
-    currentScale = Math.max(0.5, Math.min(2.5, currentScale));
-  }
-console.log(e.touches.length);
-}, { passive:false });
+    const dx = e.touches[0].clientX - previousTouchX;
+
+    previousTouchX = e.touches[0].clientX;
+
+    rotationY += dx * 0.01;
+
+  }, { passive:false });
 
 
   container.addEventListener("touchend", () => {
     isDragging = false;
   });
+
+
+const scaleSlider =
+document.querySelector("#scaleSlider");
+
+scaleSlider.addEventListener("input", () => {
+
+    currentScale =
+        scaleSlider.value / 100;
+
+});  
 
 }
 
