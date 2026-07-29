@@ -29,10 +29,14 @@ let lastTouchX = 0;
 let rotateRoot = null;
 
 let previousMouseX = 0;
-let rotationY = 0;
-let previousTouchX = 0;
 
+let rotationY = 0;
+let rotationX = 0;
+let previousTouchX = 0;
+let previousTouchY = 0;
+let previousMouseY = 0;
 let currentScale = 1.0;
+
 
 
 
@@ -279,6 +283,7 @@ function animate(renderer, scene, camera) {
 
   if (rotateRoot) {
     rotateRoot.rotation.y = rotationY;
+    rotateRoot.rotation.x = rotationX;
     rotateRoot.scale.set(
     currentScale,
     currentScale,
@@ -324,6 +329,7 @@ function setupInput() {
   container.addEventListener("mousedown", (e) => {
     isDragging = true;
     previousMouseX = e.clientX;
+    previousMouseY = e.clientY;
   });
 
   window.addEventListener("mouseup", () => {
@@ -334,8 +340,20 @@ function setupInput() {
     if (!isDragging) return;
     if (!rotateRoot) return;
     const dx = e.clientX - previousMouseX;
+    const dy = e.clientY - previousMouseY;
+
     previousMouseX = e.clientX;
+    previousMouseY = e.clientY;
     rotationY += dx * 0.01;
+    rotationX += dy * 0.01;
+    rotationX = Math.max(
+      -0.8,
+      Math.min(
+        0.8,
+        rotationX
+      )
+    );
+
     console.log("rotation", rotationY);
   });
 
@@ -347,6 +365,7 @@ function setupInput() {
     isDragging = true;
 
     previousTouchX = e.touches[0].clientX;
+    previousTouchY = e.touches[0].clientY;
 
   }, { passive:false });
 
@@ -359,10 +378,13 @@ function setupInput() {
     if (!isDragging) return;
 
     const dx = e.touches[0].clientX - previousTouchX;
+    const dy = e.touches[0].clientY - previousTouchY;
 
     previousTouchX = e.touches[0].clientX;
+    previousTouchY = e.touches[0].clientY;
 
     rotationY += dx * 0.01;
+    rotationX += dy * 0.01;
 
   }, { passive:false });
 
