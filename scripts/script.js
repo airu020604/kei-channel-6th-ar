@@ -394,16 +394,6 @@ function setupInput() {
   });
 
 
-const scaleSlider =
-document.querySelector("#scaleSlider");
-
-scaleSlider.addEventListener("input", () => {
-
-    currentScale =
-        scaleSlider.value / 100;
-
-});  
-
 }
 
 
