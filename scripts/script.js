@@ -38,7 +38,7 @@ let previousMouseY = 0;
 let currentScale = 1.0;
 
 let pinchDistance = 0;
-
+let lastScale = 1;
 
 
 
@@ -290,21 +290,19 @@ function animate(renderer, scene, camera) {
     if (mixer) {
       mixer.update(delta);
     }
+    if (rotateRoot) {
+      rotateRoot.rotation.y += (rotationY - rotateRoot.rotation.y) * 0.15;
 
-  if (rotateRoot) {
-    rotateRoot.rotation.y = THREE.MathUtils.lerp(
-      rotateRoot.rotation.y,
-      rotationY,
-      0.2
-    );
+      rotateRoot.rotation.x += (rotationX - rotateRoot.rotation.x) * 0.15;
 
-    rotateRoot.rotation.x = THREE.MathUtils.lerp(
-      rotateRoot.rotation.x,
-      rotationX,
-      0.2
-    );
-    rotateRoot.scale.setScalar(currentScale);
-  }
+
+
+    if (currentScale !== lastScale) {
+      rotateRoot.scale.setScalar(currentScale);
+      lastScale = currentScale;
+    }
+
+    }
     // VRM更新
     if (vrm) {
       vrm.update(delta);
