@@ -283,11 +283,6 @@ function animate(renderer, scene, camera) {
   if (rotateRoot) {
     rotateRoot.rotation.y = rotationY;
     rotateRoot.rotation.x = rotationX;
-    rotateRoot.scale.set(
-    currentScale,
-    currentScale,
-    currentScale
-    );
     rotateRoot.scale.setScalar(currentScale);
   }
     // VRM更新
