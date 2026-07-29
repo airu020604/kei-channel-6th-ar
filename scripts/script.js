@@ -39,6 +39,7 @@ let currentScale = 1.0;
 
 let pinchDistance = 0;
 let lastScale = 1;
+let smoothRoot = null;
 
 
 
@@ -109,7 +110,7 @@ const start = async () => {
     isTracking = true;
     appearTime = 0;
     vrm.scene.visible = true;
-    vrm.scene.position.set(0, -0.4, 0);
+    //vrm.scene.position.set(0, -0.4, 0);
     vrm.scene.scale.set(1, 1, 1);
     vrm.lookAt = null;
     vrm.scene.traverse((obj) => {
@@ -249,6 +250,7 @@ function createLight(scene){
 
 // ===== VRM読み込み関数 Start =====
 function loadVRM(anchor) {
+  vrm.scene.position.set(0, -0.8, 0);
   return new Promise((resolve, reject) => {
     const loader = new GLTFLoader();
     loader.register(parser => new VRMLoaderPlugin(parser));
@@ -270,11 +272,17 @@ function loadVRM(anchor) {
         }
       });
 
-      modelRoot = new THREE.Group();
-      rotateRoot = new THREE.Group();
-      rotateRoot.add(vrm.scene);
-      modelRoot.add(rotateRoot);
-      anchor.group.add(modelRoot);
+smoothRoot = new THREE.Group();
+
+modelRoot = new THREE.Group();
+
+rotateRoot = new THREE.Group();
+
+rotateRoot.add(vrm.scene);
+modelRoot.add(rotateRoot);
+smoothRoot.add(modelRoot);
+
+anchor.group.add(smoothRoot);
 
 
         //vrm.scene.visible = false;
@@ -346,10 +354,26 @@ function animate(renderer, scene, camera) {
     }
     // VRM更新
     if (vrm) {
-      //vrm.update(delta);
+      vrm.update(delta);
     }
     renderer.render(scene, camera);
   });
+
+
+if (smoothRoot) {
+
+    smoothRoot.position.lerp(
+        anchor.group.position,
+        0.2
+    );
+
+    smoothRoot.quaternion.slerp(
+        anchor.group.quaternion,
+        0.2
+    );
+
+}
+console.log(clock.getDelta());
 }
 // ===== アニメーション関数 End =====
 
