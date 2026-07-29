@@ -126,15 +126,19 @@ const start = async () => {
           return;
         }
 
-      if (animationAction) {
-        animationAction.reset();
-        animationAction.play();
-      }
-    });
-    if (animationAction) {
-      animationAction.reset();
-      animationAction.play();
-    }
+if (animationAction) {
+
+    vrm.humanoid?.resetNormalizedPose();
+
+    vrm.springBoneManager?.reset();
+
+    mixer.setTime(0);
+
+    animationAction.reset();
+
+    animationAction.play();
+
+}
 
   /*  
   if (!worldLocked) {
