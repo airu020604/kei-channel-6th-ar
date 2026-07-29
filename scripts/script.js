@@ -152,10 +152,33 @@ const start = async () => {
 };
 
   // ===== ターゲットを見失った時 =====
-  anchor.onTargetLost = () => {
+anchor.onTargetLost = () => {
+
+    if (!vrm) return;
+
     vrm.scene.visible = false;
+
     isTracking = false;
-  };
+
+    if (animationAction) {
+
+        animationAction.stop();
+
+        animationAction.reset();
+
+    }
+
+    if (mixer) {
+
+        mixer.setTime(0);
+
+    }
+
+    vrm.humanoid?.resetNormalizedPose();
+
+    vrm.springBoneManager?.reset();
+
+};
 
   // ===== Cube作成関数 =====
   const cube = createCube();
