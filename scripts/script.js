@@ -405,7 +405,7 @@ if (e.touches.length === 2){
         )
       );
     return;
-  }
+    }
 
 
 
@@ -423,6 +423,14 @@ if (e.touches.length === 2){
 
     rotationY += dx * 0.01;
     rotationX += dy * 0.01;
+
+    rotationX = Math.max(
+    -0.8,
+    Math.min(
+        0.8,
+        rotationX
+    )
+);
 
   }, { passive:false });
 
