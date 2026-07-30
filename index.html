@@ -16,7 +16,7 @@
     "@pixiv/three-vrm-animation":"https://unpkg.com/@pixiv/three-vrm-animation@2.1.1/lib/three-vrm-animation.module.js"
     }}
   </script>
-  <script type="module" src="./scripts/script.js"></script>
+  <script type="module" src="./scripts/script_v3.js"></script>
  
   <title>KEI CHANNEL 6th AR</title>
 </head>
@@ -41,7 +41,7 @@
     </button>
 
     <button id="effectBtn">
-      <p class="button-text">✨ 演出モード</p><p class="on-p">▶</p>
+      <p class="button-text">✨ ケイちゃんを見る</p><p class="on-p">▶</p>
     </button>
 
     <button id="startBtn">
@@ -53,11 +53,37 @@
 
   <div id="container">
 
+
+<div id="arButtons">
+
+<button id="lockBtn">
+📍位置固定
+</button>
+
+<button id="resetBtn">
+↺ リセット
+</button>
+
+<button id="upBtn">
+▲
+</button>
+
+<button id="downBtn">
+▼
+</button>
+
+</div>
+
     <div id="cameraUI">
       <button id="captureBtn" style="display:none;">
       📷 撮影B
       </button>
     </div>
+
+
+
+
+
   </div>
 
 </body>

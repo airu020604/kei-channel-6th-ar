@@ -12,79 +12,47 @@ import {
 
 // ===== グローバル変数 =====
 let vrm = null;
-let appearTime = 0;
-let isAppearing = false;
-let isTracking = false;
-let renderer;
 let mode = "photo";
-let currentState;
-let idleBaseY = -0.6;
-let blinkTimer = 0;
+
+
+let renderer;
 let mixer = null;
 let animationAction = null;
+
+let anchor = null;
+let scene = null;
+
 let modelRoot = null;
-let worldLocked = false;
-let isDragging = false;
-let lastTouchX = 0;
 let rotateRoot = null;
 
-let previousMouseX = 0;
+let isDragging = false;
 
-let rotationY = 0;
 let rotationX = 0;
+let rotationY = 0;
+
+let previousMouseX = 0;
+let previousMouseY = 0;
+
 let previousTouchX = 0;
 let previousTouchY = 0;
-let previousMouseY = 0;
+
 let currentScale = 0.85;
-
 let pinchDistance = 0;
-let lastScale = 1;
-let smoothRoot = null;
-let anchor = null;
 
-let lostTimer = 0;
-const LOST_DELAY = 2;
-
+let isTracking = false;
 
 let isLocked = false;
 let heightOffset = 0;
 
-const lockBtn =
-document.querySelector("#lockBtn");
-
-
-
-const targetPos = new THREE.Vector3();
-const targetQuat = new THREE.Quaternion();
-
-
+let idleBaseY = -0.5;
 
 const lockedPosition = new THREE.Vector3();
 const lockedQuaternion = new THREE.Quaternion();
 const lockedScale = new THREE.Vector3();
 
-
-// ===== 変化しない変数の設定 =====
 const clock = new THREE.Clock();
 
-const State = {
-  HIDDEN: 0,
-  APPEARING: 1,
-  IDLE: 2,
-  EFFECT: 3
-};
 
-const Motion = {
-  DANCE: "dance",
-  WAVE: "wave",
-  POSE: "pose"
-}
-//playMotion(Motion.DANCE);
-
-currentState = State.HIDDEN;
-const photoBtn = document.querySelector("#photoBtn");
-const effectBtn = document.querySelector("#effectBtn");
-const startBtn = document.querySelector("#startBtn");
 
 
 // ===== スタート関数 Start =====
@@ -108,7 +76,7 @@ const start = async () => {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
-  const scene = renderData.scene;
+  scene = renderData.scene;
   const camera = renderData.camera;
 
   
@@ -124,105 +92,45 @@ const start = async () => {
 
 
 //
-  anchor.onTargetFound = () => {
-    
-    lostTimer = 0;
-    vrm.scene.visible = true;
-    //particleStartTime = clock.getElapsedTime();
+anchor.onTargetFound = () => {
 
     if (!vrm) return;
 
-    if (isTracking) return;
-
-    isTracking = true;
-    appearTime = 0;
     vrm.scene.visible = true;
-    //vrm.scene.position.set(0, -0.4, 0);
-    //vrm.scene.scale.set(1, 1, 1);
-    vrm.lookAt = null;
-    vrm.scene.traverse((obj) => {
 
-      if (!obj.isMesh) return;
+    if (!isTracking) {
 
-      const name = obj.name.toLowerCase();
+        isTracking = true;
 
-      // 目・顔は透明化しない
-      if (
-        name.includes("eye") ||
-        name.includes("face")
-        ) {
-          return;
+        if (animationAction) {
+
+            mixer.setTime(0);
+
+            animationAction.reset();
+
+            animationAction.play();
+
         }
 
-if (animationAction) {
+    }
 
-    vrm.humanoid?.resetNormalizedPose();
-
-    vrm.springBoneManager?.reset();
-
-    mixer.setTime(0);
-
-    animationAction.reset();
-
-    animationAction.play();
-
-}
-    });
-if (animationAction) {
-
-    vrm.humanoid?.resetNormalizedPose();
-
-    vrm.springBoneManager?.reset();
-
-    mixer.setTime(0);
-
-    animationAction.reset();
-
-    animationAction.play();
-
-}
-
-  /*  
-  if (!worldLocked) {
-    modelRoot.updateMatrixWorld(true);
-    modelRoot.getWorldPosition(lockedPosition);
-    modelRoot.getWorldQuaternion(lockedQuaternion);
-    modelRoot.getWorldScale(lockedScale);
-    anchor.group.remove(modelRoot);
-    scene.add(modelRoot);
-    modelRoot.position.copy(lockedPosition);
-    modelRoot.quaternion.copy(lockedQuaternion);
-    modelRoot.scale.copy(lockedScale);
-    worldLocked = true;
-  }*/
 };
 
   // ===== ターゲットを見失った時 =====
 anchor.onTargetLost = () => {
 
-    if (!vrm) return;
+    if (!isLocked) {
 
-    lostTimer = clock.getElapsedTime();
-
-    /*if (animationAction) {
-        animationAction.stop();
-        animationAction.reset();
-    }*/
-
-isTracking = false;
-
-
-    if (mixer) {
-
-        mixer.setTime(0);
+        vrm.scene.visible = false;
 
     }
 
-    vrm.humanoid?.resetNormalizedPose();
-
-    vrm.springBoneManager?.reset();
+    isTracking = false;
 
 };
+
+
+
 
   // ===== Cube作成関数 =====
   const cube = createCube();
@@ -319,7 +227,7 @@ function loadVRM(anchor) {
 
       vrm.scene.scale.set(1, 1, 1);
       vrm.scene.position.set(0, -0.5, 0);
-      idleBaseY = -0.6;
+      idleBaseY = -0.5;
       vrm.scene.rotation.y = Math.PI;
 
       vrm.scene.traverse((obj) => {
@@ -328,17 +236,16 @@ function loadVRM(anchor) {
         }
       });
 vrm.scene.position.set(0, -0.5, 0);
-smoothRoot = new THREE.Group();
 
 modelRoot = new THREE.Group();
 
 rotateRoot = new THREE.Group();
 
 rotateRoot.add(vrm.scene);
-modelRoot.add(rotateRoot);
-smoothRoot.add(modelRoot);
 
-anchor.group.add(smoothRoot);
+modelRoot.add(rotateRoot);
+
+anchor.group.add(modelRoot);
 
 
         vrm.scene.visible = true;
@@ -443,14 +350,6 @@ if (
 
     renderer.render(scene, camera);
   });
-
-anchor.group.getWorldPosition(targetPos);
-anchor.group.getWorldQuaternion(targetQuat);
-
-modelRoot.position.lerp(targetPos, 0.15);
-modelRoot.quaternion.slerp(targetQuat, 0.15);
-
-console.log(clock.getDelta());
 }
 // ===== アニメーション関数 End =====
 
@@ -476,7 +375,7 @@ photoBtn.onclick = async () => {
 };
 
 effectBtn.onclick = async () => {
-    mode = "effect";
+    idleBaseY "effect";
     document.querySelector("#menu").style.display = "none";
     document.querySelector("#container").style.display = "block";
     await start();

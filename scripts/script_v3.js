@@ -12,79 +12,42 @@ import {
 
 // ===== グローバル変数 =====
 let vrm = null;
-let appearTime = 0;
-let isAppearing = false;
-let isTracking = false;
-let renderer;
-let mode = "photo";
-let currentState;
-let idleBaseY = -0.6;
-let blinkTimer = 0;
 let mixer = null;
 let animationAction = null;
-let modelRoot = null;
-let worldLocked = false;
+
+let renderer;
+let scene;
+let anchor;
+
+let modelRoot;
+let rotateRoot;
+
+const clock = new THREE.Clock();
+
+let mode = "photo";
+
+let isTracking = false;
+let isLocked = false;
 let isDragging = false;
-let lastTouchX = 0;
-let rotateRoot = null;
+
+let rotationX = 0;
+let rotationY = 0;
 
 let previousMouseX = 0;
+let previousMouseY = 0;
 
-let rotationY = 0;
-let rotationX = 0;
 let previousTouchX = 0;
 let previousTouchY = 0;
-let previousMouseY = 0;
-let currentScale = 0.85;
 
-let pinchDistance = 0;
-let lastScale = 1;
-let smoothRoot = null;
-let anchor = null;
+let currentScale = 1.0;
 
-let lostTimer = 0;
-const LOST_DELAY = 2;
-
-
-let isLocked = false;
 let heightOffset = 0;
-
-const lockBtn =
-document.querySelector("#lockBtn");
-
-
-
-const targetPos = new THREE.Vector3();
-const targetQuat = new THREE.Quaternion();
-
-
 
 const lockedPosition = new THREE.Vector3();
 const lockedQuaternion = new THREE.Quaternion();
 const lockedScale = new THREE.Vector3();
 
 
-// ===== 変化しない変数の設定 =====
-const clock = new THREE.Clock();
-
-const State = {
-  HIDDEN: 0,
-  APPEARING: 1,
-  IDLE: 2,
-  EFFECT: 3
-};
-
-const Motion = {
-  DANCE: "dance",
-  WAVE: "wave",
-  POSE: "pose"
-}
-//playMotion(Motion.DANCE);
-
-currentState = State.HIDDEN;
-const photoBtn = document.querySelector("#photoBtn");
-const effectBtn = document.querySelector("#effectBtn");
-const startBtn = document.querySelector("#startBtn");
 
 
 // ===== スタート関数 Start =====
@@ -108,7 +71,7 @@ const start = async () => {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
-  const scene = renderData.scene;
+  scene = renderData.scene;
   const camera = renderData.camera;
 
   
@@ -124,111 +87,39 @@ const start = async () => {
 
 
 //
-  anchor.onTargetFound = () => {
-    
-    lostTimer = 0;
-    vrm.scene.visible = true;
-    //particleStartTime = clock.getElapsedTime();
-
-    if (!vrm) return;
+anchor.onTargetFound = async () => {
 
     if (isTracking) return;
 
     isTracking = true;
-    appearTime = 0;
+
+    await unloadVRM();
+
+    await loadCharacter();
+
     vrm.scene.visible = true;
-    //vrm.scene.position.set(0, -0.4, 0);
-    //vrm.scene.scale.set(1, 1, 1);
-    vrm.lookAt = null;
-    vrm.scene.traverse((obj) => {
-
-      if (!obj.isMesh) return;
-
-      const name = obj.name.toLowerCase();
-
-      // 目・顔は透明化しない
-      if (
-        name.includes("eye") ||
-        name.includes("face")
-        ) {
-          return;
-        }
-
-if (animationAction) {
-
-    vrm.humanoid?.resetNormalizedPose();
-
-    vrm.springBoneManager?.reset();
-
-    mixer.setTime(0);
 
     animationAction.reset();
-
     animationAction.play();
 
 }
-    });
-if (animationAction) {
-
-    vrm.humanoid?.resetNormalizedPose();
-
-    vrm.springBoneManager?.reset();
-
-    mixer.setTime(0);
-
-    animationAction.reset();
-
-    animationAction.play();
-
-}
-
-  /*  
-  if (!worldLocked) {
-    modelRoot.updateMatrixWorld(true);
-    modelRoot.getWorldPosition(lockedPosition);
-    modelRoot.getWorldQuaternion(lockedQuaternion);
-    modelRoot.getWorldScale(lockedScale);
-    anchor.group.remove(modelRoot);
-    scene.add(modelRoot);
-    modelRoot.position.copy(lockedPosition);
-    modelRoot.quaternion.copy(lockedQuaternion);
-    modelRoot.scale.copy(lockedScale);
-    worldLocked = true;
-  }*/
-};
 
   // ===== ターゲットを見失った時 =====
 anchor.onTargetLost = () => {
 
-    if (!vrm) return;
+    isTracking = false;
 
-    lostTimer = clock.getElapsedTime();
+    if (!isLocked) {
 
-    /*if (animationAction) {
-        animationAction.stop();
-        animationAction.reset();
-    }*/
-
-isTracking = false;
-
-
-    if (mixer) {
-
-        mixer.setTime(0);
+        vrm.scene.visible = false;
 
     }
 
-    vrm.humanoid?.resetNormalizedPose();
+}
 
-    vrm.springBoneManager?.reset();
-
-};
-
-  // ===== Cube作成関数 =====
-  const cube = createCube();
 
   // ===== VRM読み込み関数 呼び出し =====
-  await loadVRM(anchor);
+  await loadCharacter();
 
 
 const textureLoader = new THREE.TextureLoader();
@@ -260,9 +151,6 @@ modelRoot.add(shadow);
 
 
 
-  
-  // ===== VRMA読み込み関数 呼び出し =====
-  await loadVRMA();
   
   //anchor.group.add(cube);
   await mindarThree.start();
@@ -317,46 +205,64 @@ function loadVRM(anchor) {
         vrm.lookAt.autoUpdate = false;
       }
 
-      vrm.scene.scale.set(1, 1, 1);
-      vrm.scene.position.set(0, -0.5, 0);
-      idleBaseY = -0.6;
-      vrm.scene.rotation.y = Math.PI;
+      vrm.scene.scale.setScalar(1);
+      vrm.scene.position.set(0,-0.55,0);
+      vrm.scene.rotation.set(0,Math.PI,0);
 
       vrm.scene.traverse((obj) => {
         if (obj.material) {
           obj.material.needsUpdate = true;
         }
       });
-vrm.scene.position.set(0, -0.5, 0);
-smoothRoot = new THREE.Group();
-
-modelRoot = new THREE.Group();
-
-rotateRoot = new THREE.Group();
-
-rotateRoot.add(vrm.scene);
-modelRoot.add(rotateRoot);
-smoothRoot.add(modelRoot);
-
-anchor.group.add(smoothRoot);
-
-
-        vrm.scene.visible = true;
-        vrm.scene.position.set(0, -0.5, 0);
-        vrm.scene.scale.set(1,1,1);
+      rotateRoot = new THREE.Group();
+      rotateRoot.add(vrm.scene);
+      modelRoot = new THREE.Group();
+      modelRoot.add(rotateRoot);
+      anchor.group.add(modelRoot);
         resolve();
       },
       undefined,
       reject
     );
   });
-
-
-
-
-
   
 }
+
+
+
+
+
+async function unloadVRM() {
+
+    if (!modelRoot) return;
+
+    if (animationAction) {
+        animationAction.stop();
+        animationAction = null;
+    }
+
+    if (mixer) {
+        mixer.stopAllAction();
+        mixer = null;
+    }
+
+    modelRoot.parent?.remove(modelRoot);
+
+    vrm = null;
+    modelRoot = null;
+    rotateRoot = null;
+
+}
+
+
+async function loadCharacter() {
+
+    await loadVRM(anchor);
+
+    await loadVRMA();
+
+}
+
 
 
 // ===== ロードVRMA設定関数 Start =====
@@ -403,54 +309,22 @@ function animate(renderer, scene, camera) {
     if (mixer) {
       mixer.update(delta);
     }
-    if (rotateRoot) {
-      rotateRoot.rotation.y += (rotationY - rotateRoot.rotation.y) * 0.15;
 
-      rotateRoot.rotation.x += (rotationX - rotateRoot.rotation.x) * 0.15;
-
-
-
-    if (currentScale !== lastScale) {
-      rotateRoot.scale.setScalar(currentScale);
-      lastScale = currentScale;
-    }
-
-    }
-    // VRM更新
     if (vrm) {
-      vrm.update(delta);
+    vrm.update(delta);
+    vrm.springBoneManager?.update(delta);
     }
 
-
-
-if (
-    lostTimer > 0 &&
-    clock.getElapsedTime() - lostTimer > LOST_DELAY
-) {
-
-    if (vrm && vrm.scene.visible) {
-
-        vrm.scene.visible = false;
-
-        isTracking = false;
-
-        lostTimer = 0;
-
+    if (rotateRoot){
+      rotateRoot.rotation.y = rotationY;
+      rotateRoot.rotation.x = rotationX;
+      rotateRoot.scale.setScalar(currentScale);
     }
 
-}
+    renderer.render(scene,camera);
 
-
-    renderer.render(scene, camera);
+    
   });
-
-anchor.group.getWorldPosition(targetPos);
-anchor.group.getWorldQuaternion(targetQuat);
-
-modelRoot.position.lerp(targetPos, 0.15);
-modelRoot.quaternion.slerp(targetQuat, 0.15);
-
-console.log(clock.getDelta());
 }
 // ===== アニメーション関数 End =====
 
@@ -640,6 +514,7 @@ container.addEventListener("touchend", (e)=>{
 });
 
 }
+
 
 
 
