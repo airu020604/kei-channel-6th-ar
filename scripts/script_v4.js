@@ -98,6 +98,17 @@ const start = async () => {
 
   const renderData = mindarThree;
   renderer = renderData.renderer;
+  renderer.setPixelRatio(window.devicePixelRatio);
+
+/*  renderer.setSize(
+    window.innerWidth,
+    window.innerHeight
+  );
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  scene = renderData.scene;
+  const camera = renderData.camera;
+  */
+
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
