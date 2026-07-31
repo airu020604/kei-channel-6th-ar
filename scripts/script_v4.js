@@ -76,12 +76,6 @@ const clock = new THREE.Clock();
 
 // ===== スタート関数 Start =====
 const start = async () => {
-
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(
-    window.innerWidth,
-    window.innerHeight
-  );  
   
   const mindarThree = new MindARThree({
     
@@ -94,11 +88,9 @@ const start = async () => {
     }
   });
 
-  
 
-  const renderData = mindarThree;
-  renderer = renderData.renderer;
-  renderer.setPixelRatio(window.devicePixelRatio);
+const renderData = mindarThree;
+renderer = renderData.renderer;
 
 /*  renderer.setSize(
     window.innerWidth,
