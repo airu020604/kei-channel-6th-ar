@@ -76,6 +76,12 @@ const clock = new THREE.Clock();
 
 // ===== スタート関数 Start =====
 const start = async () => {
+
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(
+    window.innerWidth,
+    window.innerHeight
+  );  
   
   const mindarThree = new MindARThree({
     
@@ -83,8 +89,8 @@ const start = async () => {
     imageTargetSrc: "./targets/targets.mind",
         cameraConfig:{
         facingMode:"environment",
-        width:1920,
-        height:1080
+        //width:1920,
+        //height:1080
     }
   });
 

@@ -22,12 +22,10 @@ body#all-body p,H1,H2{
 }
 
 
-#container{
-    inset:0;
-    position: relative;
-    width:100%;
-    height:100%;
-    touch-action:none;
+#container {
+  width:100%;
+  height:100vh;
+  overflow:hidden;
 }
 
 
