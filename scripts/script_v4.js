@@ -545,7 +545,8 @@ function setupInput() {
   });
 
 
-  container.addEventListener("touchstart", (e) => {
+container.addEventListener("touchstart", (e) => {
+
 
   if (e.touches.length === 1){
 
@@ -554,28 +555,40 @@ function setupInput() {
     previousTouchX = e.touches[0].clientX;
     previousTouchY = e.touches[0].clientY;
 
-}
+    return;
+  }
 
-if (e.touches.length === 2){
+
+  if (e.touches.length === 2){
+
+    isDragging = false;
 
     pinchDistance = getDistance(e.touches);
 
-}
+    return;
 
-    isDragging = true;
+  }
 
-    previousTouchX = e.touches[0].clientX;
-    previousTouchY = e.touches[0].clientY;
 
-  }, { passive:false });
+}, { passive:false });
 
-  container.addEventListener("touchmove", (e) => {
+container.addEventListener("touchmove", (e) => {
+
+    e.preventDefault();
+
 
     if (e.touches.length === 2){
+
       const distance = getDistance(e.touches);
+
       const diff = distance - pinchDistance;
+
       pinchDistance = distance;
+
+
       currentScale += diff * 0.003;
+
+
       currentScale = Math.max(
         0.5,
         Math.min(
@@ -583,35 +596,44 @@ if (e.touches.length === 2){
           currentScale
         )
       );
-    return;
+
+
+      return;
+
     }
 
-
-
-    e.preventDefault();
 
     if (!rotateRoot) return;
 
     if (!isDragging) return;
 
-    const dx = e.touches[0].clientX - previousTouchX;
-    const dy = e.touches[0].clientY - previousTouchY;
+
+    const dx =
+    e.touches[0].clientX - previousTouchX;
+
+    const dy =
+    e.touches[0].clientY - previousTouchY;
+
 
     previousTouchX = e.touches[0].clientX;
     previousTouchY = e.touches[0].clientY;
 
+
     rotationY += dx * 0.01;
+
     rotationX += dy * 0.01;
 
+
     rotationX = Math.max(
-    -0.8,
-    Math.min(
+      -0.8,
+      Math.min(
         0.8,
         rotationX
-    )
-);
+      )
+    );
 
-  }, { passive:false });
+
+}, { passive:false });
 
 
 container.addEventListener("touchend", (e)=>{
