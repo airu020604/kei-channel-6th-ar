@@ -234,3 +234,50 @@ border-radius:10px;
 background:#ffffffdd;
 
 }
+
+
+
+#guide{
+
+position:absolute;
+
+left:50%;
+top:50%;
+
+transform:translate(-50%,-50%);
+
+z-index:999;
+
+pointer-events:none;
+
+text-align:center;
+
+}
+
+#guide img{
+
+    width:min(70vw,420px);
+    max-width:85%;
+
+    opacity:.35;
+
+filter:brightness(1);
+
+}
+
+#guide p{
+
+margin-top:12px;
+
+color:white;
+
+font-size:20px;
+
+text-shadow:0 0 8px black;
+
+}
+
+
+#arButtons{
+  touch-action:none;
+}
