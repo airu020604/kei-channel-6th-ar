@@ -337,16 +337,18 @@ function animate(renderer, scene, camera) {
 
 if (rotateRoot) {
 
-  rotateRoot.rotation.y += (rotationY - rotateRoot.rotation.y) * 0.15;
+  rotateRoot.rotation.y += 
+    (rotationY - rotateRoot.rotation.y) * 0.15;
 
-  rotateRoot.rotation.x += (rotationX - rotateRoot.rotation.x) * 0.15;
+  rotateRoot.rotation.x += 
+    (rotationX - rotateRoot.rotation.x) * 0.15;
 
-  rotateRoot.position.y += (modelY - rotateRoot.position.y) * 0.15;
 
+  if(currentScale !== lastScale){
 
-  if (currentScale !== lastScale) {
     rotateRoot.scale.setScalar(currentScale);
     lastScale = currentScale;
+
   }
 
 }
