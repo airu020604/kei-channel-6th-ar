@@ -81,16 +81,13 @@ const start = async () => {
     
     container: document.querySelector("#container"),
     imageTargetSrc: "./targets/targets.mind",
-        cameraConfig:{
-        facingMode:"environment",
-        //width:1920,
-        //height:1080
-    }
+        cameraConfig:{}
   });
 
 
 const renderData = mindarThree;
 renderer = renderData.renderer;
+console.log("RENDERER CHECK", renderer);
 
 /*  renderer.setSize(
     window.innerWidth,
@@ -189,9 +186,14 @@ modelRoot.add(shadow);
   await loadVRMA();
   
   //anchor.group.add(cube);
-  await mindarThree.start();
-  setupInput();
-  animate(renderer, scene, camera);
+console.log("BEFORE MINDAR START");
+
+await mindarThree.start();
+
+console.log("AFTER MINDAR START");
+
+setupInput();
+animate(renderer, scene, camera);
 
 
   
@@ -270,7 +272,10 @@ anchor.group.add(modelRoot);
         resolve();
       },
       undefined,
-      reject
+      (error)=>{
+        console.error("VRM LOAD ERROR", error);
+        reject(error);
+      }
     );
   });
 
@@ -423,7 +428,19 @@ photoBtn.onclick = async () => {
   mode = "photo";
   document.querySelector("#menu").style.display = "none";
   document.querySelector("#container").style.display = "block";
-  await start();
+
+
+  try {
+
+    await start();
+
+  } catch(e) {
+
+    console.error("START ERROR", e);
+
+  }
+
+
   captureBtn.style.display = "block";
 };
 
