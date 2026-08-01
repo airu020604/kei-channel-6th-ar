@@ -456,125 +456,64 @@ console.log(
   });
 
 
-container.addEventListener("touchstart", (e) => {
-
-
-  if (e.touches.length === 1){
-
-    isDragging = true;
-
-    previousTouchX = e.touches[0].clientX;
-    previousTouchY = e.touches[0].clientY;
-
-    return;
-  }
-
-
-  if (e.touches.length === 2){
-
-    isDragging = false;
-
-    pinchDistance = getDistance(e.touches);
-
-    return;
-
-  }
-
-
-}, { passive:false });
-
-container.addEventListener("touchmove", (e) => {
-
-    e.preventDefault();
-
+  container.addEventListener("touchstart", (e) => {
+    if (e.touches.length === 1){
+      isDragging = true;
+      previousTouchX = e.touches[0].clientX;
+      previousTouchY = e.touches[0].clientY;
+    }
 
     if (e.touches.length === 2){
-
-      const distance = getDistance(e.touches);
-
-      const diff = distance - pinchDistance;
-
-      pinchDistance = distance;
-
-
-      currentScale += diff * 0.003;
-      modelRoot.scale.set(
-        currentScale,
-        currentScale,
-        currentScale
-    );
-
-
-      currentScale = Math.max(
-        0.5,
-        Math.min(
-          3,
-          currentScale
-        )
-      );
-
-      return;
-
+      pinchDistance = getDistance(e.touches);
     }
 
-
-    if (!rotateRoot) return;
-
-    if (!isDragging) return;
-
-
-    const dx =
-    e.touches[0].clientX - previousTouchX;
-
-    const dy =
-    e.touches[0].clientY - previousTouchY;
-
-
+    isDragging = true;
     previousTouchX = e.touches[0].clientX;
     previousTouchY = e.touches[0].clientY;
+  },{ passive:false });
 
 
+  container.addEventListener("touchmove", (e) => {
+    if (e.touches.length === 2){
+      const distance = getDistance(e.touches);
+      const diff = distance - pinchDistance;
+      pinchDistance = distance;
+      currentScale += diff * 0.003;
+      currentScale = Math.max(0.5,Math.min(3,currentScale));
+      return;
+    }
+    e.preventDefault();
+    if (!rotateRoot) return;
+    //if (!isDragging) return;
+
+    const dx = e.touches[0].clientX - previousTouchX;
+    const dy = e.touches[0].clientY - previousTouchY;
+    previousTouchX = e.touches[0].clientX;
+    previousTouchY = e.touches[0].clientY;
     rotationY += dx * 0.01;
     rotationX += dy * 0.01;
-    rotateRoot.rotation.y = rotationY;
-    rotateRoot.rotation.x = rotationX;
+    rotationX = Math.max(-0.8,Math.min(0.8,rotationX));
 
+rotateRoot.rotation.x = rotationX;
+rotateRoot.rotation.y = rotationY;
 
 console.log(
-  "INPUT STATE",
-  isFixed,
-  rotationX,
-  rotationY,
+  "AFTER TOUCH ROT",
   rotateRoot.rotation.x,
-  rotateRoot.rotation.y
+  rotateRoot.rotation.y,
+  "VALUES",
+  rotationX,
+  rotationY
 );
 
+  }, { passive:false });
 
 
-    rotationX = Math.max(
-      -0.8,
-      Math.min(
-        0.8,
-        rotationX
-      )
-    );
-
-
-    
-
-
-}, { passive:false });
-
-
-container.addEventListener("touchend", (e)=>{
-
+  container.addEventListener("touchend", (e)=>{
     if(e.touches.length===0){
-
-        isDragging=false;
-
+      isDragging=false;
     }
-
-});
+  });
 
 }
 
@@ -690,31 +629,28 @@ effectBtn.onclick = async () => {
 
 
 
-upBtn.onclick = ()=>{
 
-    modelRoot.position.y += 0.2;
-console.log("UP");
+upBtn.onclick = () => {
+
 console.log(modelRoot.position.y);
-};
 
-downBtn.onclick = ()=>{
+  modelRoot.position.y += 50;
+  console.log("UP");
+  console.log(modelRoot.position.y);
+  rotateRoot.updateMatrixWorld(true);
 
-    modelRoot.position.y -= 0.2;
-console.log("DOWN");
-console.log(modelRoot.position.y);
-};
-
-
-/*
-
-document.getElementById("upBtn").onclick = () => {
-  modelY += 0.1;
 };
 
 
-document.getElementById("downBtn").onclick = () => {
-  modelY -= 0.1;
+downBtn.onclick = () => {
+
+  modelRoot.position.y -= 50;
+  console.log("DOUN");
+  console.log(modelRoot.position.y);
+  rotateRoot.updateMatrixWorld(true);
+
 };
-*/
+
+
 
 
