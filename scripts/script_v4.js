@@ -337,22 +337,13 @@ function animate(renderer, scene, camera) {
 
 if (rotateRoot) {
 
-  rotateRoot.rotation.y += 
-    (rotationY - rotateRoot.rotation.y) * 0.15;
 
-  rotateRoot.rotation.x += 
-    (rotationX - rotateRoot.rotation.x) * 0.15;
+  if(!isFixed){
 
-if(Math.floor(clock.getElapsedTime()) % 2 === 0){
-console.log(
- "ROTATE CHECK",
- isFixed,
- rotationX,
- rotationY,
- rotateRoot.rotation.x,
- rotateRoot.rotation.y
-);
-}
+    rotateRoot.rotation.y = rotationY;
+    rotateRoot.rotation.x = rotationX;
+
+  }
 
 
   if(currentScale !== lastScale){
@@ -373,7 +364,6 @@ console.log(
 
 
     // ===== 2秒後固定 =====
-
 if (
   !isFixed &&
   fixTimer > 0 &&
@@ -382,12 +372,36 @@ if (
 
   scene.attach(modelRoot);
 
+
+  console.log(
+    "BEFORE ROT",
+    modelRoot.rotation.y,
+    rotateRoot.rotation.y
+  );
+
+
+  console.log(
+    "AFTER ROT",
+    modelRoot.rotation.y,
+    rotateRoot.rotation.y
+  );
+
+
+if (rotateRoot) {
+
+  console.log(
+    "ROT VALUES",
+    rotationY,
+    rotateRoot.rotation.y
+  );
+
+}
+
   isFixed = true;
   fixTimer = 0;
 
-  console.log("MODEL FIXED");
-
 }
+
 
 
 
@@ -611,7 +625,6 @@ container.addEventListener("touchmove", (e) => {
         )
       );
 
-
       return;
 
     }
@@ -638,6 +651,7 @@ container.addEventListener("touchmove", (e) => {
     rotationX += dy * 0.01;
 
 
+
     rotationX = Math.max(
       -0.8,
       Math.min(
@@ -645,6 +659,9 @@ container.addEventListener("touchmove", (e) => {
         rotationX
       )
     );
+
+
+    
 
 
 }, { passive:false });
