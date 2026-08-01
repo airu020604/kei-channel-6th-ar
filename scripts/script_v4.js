@@ -337,7 +337,6 @@ function animate(renderer, scene, camera) {
 
 if (rotateRoot) {
 
-
   rotateRoot.rotation.y = rotationY;
   rotateRoot.rotation.x = rotationX;
 
@@ -353,77 +352,67 @@ if (rotateRoot) {
 
 
     // VRM更新
-    if (vrm) {
-      vrm.update(delta);
-    }
+if (vrm) {
+  vrm.update(delta);
+}
 
 
 
-    // ===== 2秒後固定 =====
+// ===== 2秒後固定 =====
 if (
   !isFixed &&
   fixTimer > 0 &&
   clock.getElapsedTime() - fixTimer > 2
 ) {
 
-  scene.attach(modelRoot);
-  
+
+// anchorから分離
+anchor.group.remove(modelRoot);
 
 
-  console.log(
-    "BEFORE ROT",
-    modelRoot.rotation.y,
-    rotateRoot.rotation.y
-  );
+// Sceneへ追加
+scene.add(modelRoot);
 
 
-  console.log(
-    "AFTER ROT",
-    modelRoot.rotation.y,
-    rotateRoot.rotation.y
-  );
+// 座標リセット
+modelRoot.position.set(0,0,-2);
+
+modelRoot.updateMatrixWorld(true);
+
+vrm.scene.visible = true;
+vrm.scene.frustumCulled = false;
+
+console.log("SET FIX TRUE");
+isFixed=true;
+fixTimer = 0;
+
+console.log(
+  "AFTER SET",
+  isFixed,
+  fixTimer
+);
 
 
-if (rotateRoot) {
+console.log(
+ "FIX COMPLETE",
+ modelRoot.parent.type,
+ rotateRoot.parent.type,
+ vrm.scene.parent.type,
+ modelRoot.position
+);
 
-  console.log(
-    "ROT VALUES",
-    rotationY,
-    rotateRoot.rotation.y
-  );
+console.log(
+  "WORLD CHECK",
+  "model",
+  modelRoot.getWorldPosition(new THREE.Vector3()),
+  "rotate",
+  rotateRoot.getWorldPosition(new THREE.Vector3()),
+  "vrm",
+  vrm.scene.getWorldPosition(new THREE.Vector3())
+);
 
 }
 
-  isFixed = true;
-  fixTimer = 0;
-
-}
-
-
-
-
-    /*
-    // 一旦停止
-    // マーカーを失ったら消す処理
-    // 固定表示と競合するため
-
-    if (
-      lostTimer > 0 &&
-      clock.getElapsedTime() - lostTimer > LOST_DELAY
-    ) {
-
-      if (vrm && vrm.scene.visible) {
-
-        vrm.scene.visible = false;
-
-        isTracking = false;
-
-        lostTimer = 0;
-
-      }
-
-    }
-    */
 
     renderer.render(scene, camera);
 
@@ -646,6 +635,15 @@ container.addEventListener("touchmove", (e) => {
     rotationY += dx * 0.01;
 
     rotationX += dy * 0.01;
+
+console.log(
+  "INPUT STATE",
+  isFixed,
+  rotationX,
+  rotationY,
+  rotateRoot.rotation.x,
+  rotateRoot.rotation.y
+);
 
 
 
