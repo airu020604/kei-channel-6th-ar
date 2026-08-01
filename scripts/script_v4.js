@@ -337,6 +337,17 @@ function animate(renderer, scene, camera) {
 
 if (rotateRoot) {
 
+  console.log(
+    "INPUT",
+    rotationX,
+    rotationY,
+    currentScale,
+    "ROOT",
+    rotateRoot.rotation.x,
+    rotateRoot.rotation.y,
+    rotateRoot.scale.x
+  );
+
   rotateRoot.rotation.y += 
     (rotationY - rotateRoot.rotation.y) * 0.15;
 
@@ -370,10 +381,15 @@ if (
 
   scene.attach(modelRoot);
   isFixed = true;
-
   fixTimer = 0;
 
   console.log("MODEL FIXED");
+
+  console.log(
+ "AFTER FIX PARENT",
+ rotateRoot.parent,
+ modelRoot.parent
+);
 
 }
 
