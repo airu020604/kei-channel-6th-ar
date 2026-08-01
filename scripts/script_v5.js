@@ -179,7 +179,7 @@ function loadVRM(anchor) {
       vrm.scene.scale.set(1, 1, 1);
       vrm.scene.position.set(0, -0.5, 0);
       idleBaseY = -0.5;
-      //vrm.scene.rotation.y = Math.PI;
+      vrm.scene.rotation.y = Math.PI;
 
       vrm.scene.traverse((obj) => {
         if (obj.material) {
@@ -385,7 +385,6 @@ function fixModel(){
     modelRoot.getWorldScale(scale);
 
     scene.add(modelRoot);
-
 
     modelRoot.position.copy(worldPos);
     modelRoot.quaternion.copy(worldQuat);
