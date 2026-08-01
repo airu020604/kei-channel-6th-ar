@@ -337,22 +337,22 @@ function animate(renderer, scene, camera) {
 
 if (rotateRoot) {
 
-  console.log(
-    "INPUT",
-    rotationX,
-    rotationY,
-    currentScale,
-    "ROOT",
-    rotateRoot.rotation.x,
-    rotateRoot.rotation.y,
-    rotateRoot.scale.x
-  );
-
   rotateRoot.rotation.y += 
     (rotationY - rotateRoot.rotation.y) * 0.15;
 
   rotateRoot.rotation.x += 
     (rotationX - rotateRoot.rotation.x) * 0.15;
+
+if(Math.floor(clock.getElapsedTime()) % 2 === 0){
+console.log(
+ "ROTATE CHECK",
+ isFixed,
+ rotationX,
+ rotationY,
+ rotateRoot.rotation.x,
+ rotateRoot.rotation.y
+);
+}
 
 
   if(currentScale !== lastScale){
@@ -373,6 +373,7 @@ if (rotateRoot) {
 
 
     // ===== 2秒後固定 =====
+
 if (
   !isFixed &&
   fixTimer > 0 &&
@@ -380,16 +381,11 @@ if (
 ) {
 
   scene.attach(modelRoot);
+
   isFixed = true;
   fixTimer = 0;
 
   console.log("MODEL FIXED");
-
-  console.log(
- "AFTER FIX PARENT",
- rotateRoot.parent,
- modelRoot.parent
-);
 
 }
 
