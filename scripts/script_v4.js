@@ -544,6 +544,13 @@ function setupInput() {
     previousMouseY = e.clientY;
     rotationY += dx * 0.01;
     rotationX += dy * 0.01;
+
+console.log(
+  "DRAG INPUT",
+  rotationX,
+  rotationY
+);
+    
     rotationX = Math.max(
       -0.8,
       Math.min(
