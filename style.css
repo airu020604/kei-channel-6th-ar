@@ -296,17 +296,3 @@ text-shadow:0 0 8px black;
 
 
 
-
-#debug{
-  position:fixed;
-  left:0;
-  bottom:0;
-  width:100%;
-  max-height:35%;
-  overflow:auto;
-  background:rgba(0,0,0,.8);
-  color:#0f0;
-  font-size:12px;
-  z-index:99999;
-  white-space:pre-wrap;
-}

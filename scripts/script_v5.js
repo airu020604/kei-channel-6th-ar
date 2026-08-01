@@ -496,7 +496,6 @@ console.log(
 
 rotateRoot.rotation.x = rotationX;
 rotateRoot.rotation.y = rotationY;
-log(modelRoot.position.y);
 
 
 console.log(
