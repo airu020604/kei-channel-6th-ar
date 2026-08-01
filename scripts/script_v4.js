@@ -338,12 +338,8 @@ function animate(renderer, scene, camera) {
 if (rotateRoot) {
 
 
-  if(!isFixed){
-
-    rotateRoot.rotation.y = rotationY;
-    rotateRoot.rotation.x = rotationX;
-
-  }
+  rotateRoot.rotation.y = rotationY;
+  rotateRoot.rotation.x = rotationX;
 
 
   if(currentScale !== lastScale){
@@ -371,6 +367,7 @@ if (
 ) {
 
   scene.attach(modelRoot);
+  
 
 
   console.log(
