@@ -369,7 +369,6 @@ if (
 ) {
 
   scene.attach(modelRoot);
-
   isFixed = true;
 
   fixTimer = 0;
@@ -402,10 +401,6 @@ if (
 
     }
     */
-    if (isFixed && rotateRoot) {
-      rotateRoot.position.copy(fixedPosition);
-      rotateRoot.quaternion.copy(fixedQuaternion);
-    }
 
     renderer.render(scene, camera);
 
