@@ -496,6 +496,8 @@ console.log(
 
 rotateRoot.rotation.x = rotationX;
 rotateRoot.rotation.y = rotationY;
+log(modelRoot.position.y);
+
 
 console.log(
   "AFTER TOUCH ROT",
@@ -654,3 +656,10 @@ downBtn.onclick = () => {
 
 
 
+const debug = document.getElementById("debug");
+
+function log(...args){
+  console.log(...args);
+  debug.textContent += args.join(" ") + "\n";
+  debug.scrollTop = debug.scrollHeight;
+}
