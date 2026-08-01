@@ -63,6 +63,8 @@ let previousTouchY = 0;
 
 let pinchDistance = 0;
 
+let modelY = 0;
+
 
 
 // ===== スタート関数 =====
@@ -92,6 +94,8 @@ async function start(){
     await loadVRMA();
 
     await startMindAR();
+
+    setupInput();
 
     animate();
 
@@ -682,3 +686,35 @@ effectBtn.onclick = async () => {
     await start();
     captureBtn.style.display = "none";
 };
+
+
+
+
+upBtn.onclick = ()=>{
+
+    modelRoot.position.y += 0.2;
+console.log("UP");
+console.log(modelRoot.position.y);
+};
+
+downBtn.onclick = ()=>{
+
+    modelRoot.position.y -= 0.2;
+console.log("DOWN");
+console.log(modelRoot.position.y);
+};
+
+
+/*
+
+document.getElementById("upBtn").onclick = () => {
+  modelY += 0.1;
+};
+
+
+document.getElementById("downBtn").onclick = () => {
+  modelY -= 0.1;
+};
+*/
+
+
