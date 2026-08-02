@@ -375,19 +375,20 @@ function fixModel(){
 
     if(isFixed) return;
 
+
     const worldPos = new THREE.Vector3();
     const worldQuat = new THREE.Quaternion();
     const scale = new THREE.Vector3();
 
-rotateRoot.getWorldPosition(worldPos);
-rotateRoot.getWorldQuaternion(worldQuat);
-rotateRoot.getWorldScale(scale);
+    modelRoot.getWorldPosition(worldPos);
+    modelRoot.getWorldQuaternion(worldQuat);
+    modelRoot.getWorldScale(scale);
 
-scene.add(rotateRoot);
+    scene.add(modelRoot);
 
-rotateRoot.position.copy(worldPos);
-rotateRoot.quaternion.copy(worldQuat);
-rotateRoot.scale.copy(scale);
+    modelRoot.position.copy(worldPos);
+    modelRoot.quaternion.copy(worldQuat);
+    modelRoot.scale.copy(scale);
 
     isFixed = true;
 
@@ -563,7 +564,7 @@ if(vrm){
 
         }
 
-        
+/*        
 
 if(rotateRoot){
 
@@ -571,7 +572,7 @@ if(rotateRoot){
     rotateRoot.rotation.y = rotationY;
 
 }
-/*
+
 
 if(modelRoot){
 
@@ -611,22 +612,7 @@ photoBtn.onclick = async () => {
 
     console.error("START ERROR", e);
 
-    //他のアプリにカメラ機能を使われている場合のエラー
-    if(e?.name === "NotReadableError"){
-
-        alert("カメラを起動できません。\n\n" + "他のアプリを閉じてから\n" + "もう一度お試しください。");
-
-    }else{
-
-        alert("あれれ～っ\n\n" + "なんでだろ・・・・\n" + "もう一度お試しください。");
-
-    }
-
   }
-
-
-
-  
 
 
   captureBtn.style.display = "block";
@@ -648,7 +634,7 @@ upBtn.onclick = () => {
 
 console.log(modelRoot.position.y);
 
-  rotateRoot.position.y += 50;
+  modelRoot.position.y += 50;
   console.log("UP");
   console.log(modelRoot.position.y);
   rotateRoot.updateMatrixWorld(true);
