@@ -945,8 +945,18 @@ console.log(
     renderer.domElement.height
 );
 
-    window.open(img);
+    //window.open(img);
 
+
+    const img = canvas.toDataURL("image/png");
+
+const link = document.createElement("a");
+
+link.href = img;
+
+link.download = "kei_channel_AR.png";
+
+link.click();
 
 }
 
