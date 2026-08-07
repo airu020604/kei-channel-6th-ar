@@ -919,10 +919,6 @@ console.log(
     );
 */
 
-    const img = canvas.toDataURL(
-        "image/png"
-    );
-
 console.log(
     renderer.domElement.toDataURL().slice(0,50)
 );
