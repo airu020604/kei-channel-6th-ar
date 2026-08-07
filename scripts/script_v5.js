@@ -44,7 +44,7 @@ let mode = "photo";
 let animationAction = null;
 let idleBaseY = 0;
 let modelScale = 0.8;
-let appearProgress = 1;
+let appearProgress = 0;
 let baseScale = 0.3;
 let freezeSpringBone = false;
 let isLocking = false;
@@ -65,6 +65,21 @@ let pinchDistance = 0;
 
 let modelY = 0;
 
+let currentAnchor = null;
+//次のFOUNDで再生成する
+let needReload = false;
+//今マーカーが見えている
+let isMarkerFound = false;
+//VRMが存在する
+let hasModel = false;
+
+
+const captureBtn = document.getElementById("captureBtn");
+
+// ===== メンテナンス用 =====
+const audio = new Audio("./sounds/ok.mp3");
+const shutter = new Audio("./sounds/ok.mp3");
+
 
 
 // ===== スタート関数 =====
@@ -74,26 +89,22 @@ async function start(){
 
     await loadVRM();
 
-    await new Promise(resolve=>{
-    requestAnimationFrame(resolve);
-    });
-
-    modelRoot = new THREE.Group();
-
-    rotateRoot = new THREE.Group();
-    //rotateRoot.rotation.y = Math.PI;
-
-    rotateRoot.add(vrm.scene);
-
-    modelRoot.add(rotateRoot);
-
-    anchor.group.add(modelRoot);
-
-    vrm.scene.updateMatrixWorld(true);
-
     await loadVRMA();
+    modelRoot.visible = false;
+
+console.log(
+    "AFTER LOAD",
+    vrm,
+    mixer,
+    animationAction
+);
 
     await startMindAR();
+    modelRoot.visible = true;
+
+    setTimeout(()=>{showMindARUI();},100);
+    setTimeout(()=>{showARButtons();},100);
+     
 
     setupInput();
 
@@ -108,16 +119,26 @@ async function init(){
 
     clock = new THREE.Clock();
 
-    mindarThree = new MindARThree({
+mindarThree = new MindARThree({
+    container: document.querySelector("#container"),
+    imageTargetSrc:"./targets/targets.mind",
+    uiLoading: "no",
+    uiScanning: "no",
+    uiError: "no",
 
-        container:document.querySelector("#container"),
-        imageTargetSrc:"./targets/targets.mind"
-
-    });
+    rendererOptions:{
+        preserveDrawingBuffer:true
+    }
+});
 
     renderer = mindarThree.renderer;
     scene = mindarThree.scene;
     camera = mindarThree.camera;
+
+    console.log(
+    "CANVAS INFO",
+    renderer.domElement,
+    renderer.domElement.toDataURL().slice(0,100));
 
     anchor = mindarThree.addAnchor(0);
 
@@ -153,111 +174,59 @@ scene.add(directionalLight);
 
 // ===== VRM読み込み関数 Start =====
 function loadVRM(anchor) {
+  console.log("★★★★★ LOADVRM NEW CODE ★★★★★");
 
   return new Promise((resolve, reject) => {
     const loader = new GLTFLoader();
     loader.register(parser => new VRMLoaderPlugin(parser));
     loader.load("./models/kei.vrm",
-    (gltf) => {
-      vrm = gltf.userData.vrm;
+      (gltf) => {
+        vrm = gltf.userData.vrm;
+        vrm.scene.updateMatrixWorld(true);
+        idleBaseY = -0.5;
+        vrm.scene.rotation.y = Math.PI;
 
-      vrm.scene.updateMatrixWorld(true);
+        vrm.scene.traverse((obj) => {
+          if (obj.material) {
+            obj.material.needsUpdate = true;
+          }
+        });
 
-/*      
-      if(vrm.springBoneManager){
+        modelRoot = new THREE.Group();
+        rotateRoot = new THREE.Group();
 
-        vrm.springBoneManager.reset();
+        modelRoot.visible = false;
 
-      }
-*/
-/*
-      if (vrm.lookAt) {
-        vrm.lookAt.autoUpdate = false;
-      }
-*/
+        rotateRoot.position.set(0,-1,0);
+        rotateRoot.rotation.y = Math.PI;
 
-      vrm.scene.scale.set(1, 1, 1);
-      vrm.scene.position.set(0, -0.5, 0);
-      idleBaseY = -0.5;
-      vrm.scene.rotation.y = Math.PI;
+        rotateRoot.add(vrm.scene);
+        modelRoot.add(rotateRoot);
 
-      vrm.scene.traverse((obj) => {
-        if (obj.material) {
-          obj.material.needsUpdate = true;
+        modelRoot.updateMatrixWorld(true);
+
+        if(anchor){
+          anchor.group.add(modelRoot);
+          anchor.group.updateMatrixWorld(true);
         }
-      });
-vrm.scene.position.set(0, -0.5, 0);
 
-modelRoot = new THREE.Group();
-
-rotateRoot = new THREE.Group();
-rotateRoot.position.set(
-    0,
-    -0.5,
-    0
-);
-
-rotateRoot.rotation.y = Math.PI;
-
-
-
-// VRMサイズ調整
-modelRoot.scale.set(
-    0.01,
-    0.01,
-    0.01
-);
-
-
-rotateRoot.add(vrm.scene);
-
-vrm.scene.updateMatrixWorld(true);
-
-modelRoot.add(rotateRoot);
-
-modelRoot.updateMatrixWorld(true);
-
-if(anchor){
-
-  anchor.group.add(modelRoot);
-
-  anchor.group.updateMatrixWorld(true);
-
-}
-
-
-  modelRoot.add(rotateRoot);
-
-  scene.add(modelRoot);
-modelRoot = new THREE.Group();
-
-rotateRoot = new THREE.Group();
-
-rotateRoot.add(vrm.scene);
-
-modelRoot.add(rotateRoot);
-
-
-modelRoot.position.set(0,0,-1);
-
-scene.add(modelRoot);
-
-
-modelRoot.position.y = -0.5;
-
-        vrm.scene.visible = true;
-        vrm.scene.position.set(0, -0.5, 0);
+        appearProgress = 0;
         vrm.scene.scale.set(1,1,1);
+
+        modelRoot.scale.set(0.01,0.01,0.01);
+        console.log("LOAD ROTATE ROOT",rotateRoot.uuid);
+        console.log("SCALE CHECK",modelRoot.scale.x,currentScale,appearProgress);
+
         resolve();
       },
       undefined,
       (error)=>{
         console.error("VRM LOAD ERROR", error);
+        alert("モデル読み込みエラー\n\n" + "回線の良いところで、もう一度お試しください。");
         reject(error);
       }
     );
   });
-  
 }
 
 
@@ -319,13 +288,57 @@ async function startMindAR(){
     }
 
 
-anchor.onTargetFound = ()=>{
+// ===== マーカー認識 =====
+anchor.onTargetFound = async ()=>{
+
+
+
+    currentAnchor = anchor;
 
     if(isTracking) return;
 
     isTracking = true;
 
     console.log("FOUND");
+
+    if(needReload){
+
+        console.log("RELOAD AFTER FOUND");
+
+        await loadVRM(anchor);
+
+        await loadVRMA();
+
+        needReload = false;
+
+    }
+
+    audio.play().catch(() => {});
+
+    if(!vrm){
+            console.log("LOAD START");
+
+            await loadVRM(anchor);
+
+            console.log("VRMA START");
+
+            await loadVRMA();
+
+            console.log("VRMA END");
+    }
+    if(modelRoot){
+                console.log(
+            "MODEL",
+            modelRoot.position,
+            modelRoot.visible,
+            modelRoot.parent
+        );
+        modelRoot.visible = true;
+    }
+
+
+
+
 
     freezeSpringBone = true;
 
@@ -346,25 +359,43 @@ anchor.onTargetFound = ()=>{
 anchor.onTargetLost = ()=>{
 
     console.log("LOST");
+const el = document.elementFromPoint(
+  window.innerWidth / 2,
+  window.innerHeight / 2
+);
 
-    // 固定前のロスト対策
+console.log(el);
+console.log(el.tagName);
+console.log(el.id);
+console.log(el.className);
+
+console.log(el);
+console.log(getComputedStyle(el).pointerEvents);
+console.log(getComputedStyle(el).zIndex);
+
+    /*// 固定前のロスト対策
     if(!isFixed){
-
         console.log("WAITING FIX");
+        return;
+    }*/
+
+
+    // ロード直後は無視
+    if(modelRoot && !isFixed){
+
+        console.log("LOST BEFORE FIX IGNORE");
 
         return;
 
     }
+
 
     if(isLocking){
-
         console.log("ignore lost during lock");
-
         return;
-
     }
 
-};
+  };
 
 }
 
@@ -373,53 +404,76 @@ anchor.onTargetLost = ()=>{
 
 function fixModel(){
 
-    if(isFixed) return;
+console.log(
+  "FIX ROTATE ROOT",
+  rotateRoot.uuid
+);
 
-    const worldPos = new THREE.Vector3();
-    const worldQuat = new THREE.Quaternion();
-    const scale = new THREE.Vector3();
-
-rotateRoot.getWorldPosition(worldPos);
-rotateRoot.getWorldQuaternion(worldQuat);
-rotateRoot.getWorldScale(scale);
-
-scene.add(rotateRoot);
-
-rotateRoot.position.copy(worldPos);
-rotateRoot.quaternion.copy(worldQuat);
-rotateRoot.scale.copy(scale);
-
-    isFixed = true;
+  if(isFixed) return;
 
 
-        // VRMのワールド行列更新
-    vrm.scene.updateMatrixWorld(true);
+  const worldPos = new THREE.Vector3();
+  const worldQuat = new THREE.Quaternion();
+  const worldScale = new THREE.Vector3();
 
 
-    // SpringBone再初期化
-    if(vrm.springBoneManager){
-
-        vrm.springBoneManager.reset();
-
-    }
+  modelRoot.getWorldPosition(worldPos);
+  modelRoot.getWorldQuaternion(worldQuat);
+  modelRoot.getWorldScale(worldScale);
 
 
+  // 親を変更
+  scene.add(modelRoot);
 
-    console.log("MODEL FIXED");
 
+  // ワールド座標をローカルへ変換
+  scene.worldToLocal(worldPos);
+
+  modelRoot.position.copy(worldPos);
+  modelRoot.quaternion.copy(worldQuat);
+  modelRoot.scale.copy(worldScale);
+
+
+  isFixed = true;
+
+
+  if(vrm.springBoneManager){
+    vrm.springBoneManager.reset();
+  }
+
+
+  console.log("MODEL FIXED");
+
+
+console.log(
+  "ROTATE PARENT",
+  rotateRoot.parent
+);
 }
 
 
-
-// ===== setupInput End =====
+// ===== setupInput Start =====
 function setupInput() {
-  const container = document.querySelector("#container");
+  //const container = document.querySelector("#container");
+  const container = document.body;
+
+  console.log("INPUT TARGET",container);
+
   container.style.touchAction = "none";
   container.addEventListener("mousedown", (e) => {
     isDragging = true;
     previousMouseX = e.clientX;
     previousMouseY = e.clientY;
   });
+
+
+
+window.addEventListener("touchstart", ()=>{
+
+    console.log("WINDOW TOUCH");
+
+});
+
 
   window.addEventListener("mouseup", () => {
     isDragging = false;
@@ -455,6 +509,7 @@ console.log(
 
 
   container.addEventListener("touchstart", (e) => {
+    console.log("TOUCH START");
     if (e.touches.length === 1){
       isDragging = true;
       previousTouchX = e.touches[0].clientX;
@@ -472,6 +527,10 @@ console.log(
 
 
   container.addEventListener("touchmove", (e) => {
+
+  console.log("TOUCH ROTATE ROOT",rotateRoot.uuid);
+
+
     if (e.touches.length === 2){
       const distance = getDistance(e.touches);
       const diff = distance - pinchDistance;
@@ -492,8 +551,10 @@ console.log(
     rotationX += dy * 0.01;
     rotationX = Math.max(-0.8,Math.min(0.8,rotationX));
 
-rotateRoot.rotation.x = rotationX;
-rotateRoot.rotation.y = rotationY;
+
+    //不要かも？
+//rotateRoot.rotation.x = rotationX;
+//rotateRoot.rotation.y = rotationY;
 
 
 console.log(
@@ -523,8 +584,29 @@ console.log(
 // ===== animate =====
 function animate(){
 
+if(isTracking && modelRoot.scale.x < 1){
+
+console.log(
+  "APPEAR CHECK",
+  {
+    isTracking,
+    appearProgress,
+    baseScale,
+    modelRoot,
+    scale: modelRoot ? modelRoot.scale.x : "NO MODEL"
+  }
+);
+
+}
+
     console.log(currentScale);
     renderer.setAnimationLoop(()=>{
+
+if(isFixed){
+
+    console.log("ANIMATE", modelRoot.position.y);
+
+}
 
         const delta = clock.getDelta();
 
@@ -549,41 +631,20 @@ if(vrm){
 
 }
 
-        if(isTracking && modelRoot.scale.x < 1){
-
-          appearProgress += delta * 1.5;
-
+        if(isTracking && modelRoot && modelRoot.scale.x < 1){
+          //大きくなる速度変更
+          appearProgress += delta * 3.5;
           modelScale = baseScale * appearProgress;
-
-          modelRoot.scale.set(
-            modelScale,
-            modelScale,
-            modelScale
-          );
+          modelRoot.scale.set(modelScale,modelScale,modelScale);
 
         }
 
         
 
 if(rotateRoot){
-
     rotateRoot.rotation.x = rotationX;
     rotateRoot.rotation.y = rotationY;
-
 }
-/*
-
-if(modelRoot){
-
-    modelRoot.scale.set(
-        currentScale,
-        currentScale,
-        currentScale
-    );
-
-}
-*/
-
 
         renderer.render(scene,camera);
 
@@ -600,36 +661,18 @@ if(modelRoot){
 photoBtn.onclick = async () => {
   mode = "photo";
   document.querySelector("#menu").style.display = "none";
-  document.querySelector("#container").style.display = "block";
-
 
   try {
-
     await start();
-
   } catch(e) {
-
     console.error("START ERROR", e);
-
-    //他のアプリにカメラ機能を使われている場合のエラー
+    // ===== AR起動エラー =====
     if(e?.name === "NotReadableError"){
-
         alert("カメラを起動できません。\n\n" + "他のアプリを閉じてから\n" + "もう一度お試しください。");
-
     }else{
-
-        alert("あれれ～っ\n\n" + "なんでだろ・・・・\n" + "もう一度お試しください。");
-
+        alert( e?.name + "あれれ～っ\n\n" + "なんでだろ・・・・\n" + "もう一度お試しください。");
     }
-
   }
-
-
-
-  
-
-
-  captureBtn.style.display = "block";
 };
 
 effectBtn.onclick = async () => {
@@ -644,34 +687,324 @@ effectBtn.onclick = async () => {
 
 
 
-upBtn.onclick = () => {
 
-console.log(modelRoot.position.y);
+function resetModel(){
 
-  rotateRoot.position.y += 50;
-  console.log("UP");
-  console.log(modelRoot.position.y);
-  rotateRoot.updateMatrixWorld(true);
-
-};
+    console.log("RESET START");
 
 
-downBtn.onclick = () => {
+    // 状態リセット
+    isFixed = false;
+    isTracking = false;
+    isLocking = false;
 
-  modelRoot.position.y -= 50;
-  console.log("DOUN");
-  console.log(modelRoot.position.y);
-  rotateRoot.updateMatrixWorld(true);
-
-};
+    appearProgress = 0;
+    rotationX = 0;
+    rotationY = 0;
+    currentScale = 1;
 
 
+    // モデル削除
+    if(modelRoot){
+      if(modelRoot.parent){
+
+        modelRoot.parent.remove(modelRoot);
+
+      }
+
+        scene.remove(modelRoot);
+
+        modelRoot.traverse((obj)=>{
+
+            if(obj.geometry){
+
+                obj.geometry.dispose();
+
+            }
+
+            if(obj.material){
+
+                if(Array.isArray(obj.material)){
+
+                    obj.material.forEach(m=>m.dispose());
+
+                }else{
+
+                    obj.material.dispose();
+
+                }
+
+            }
+
+        });
+
+        modelRoot = null;
+
+    }
 
 
-const debug = document.getElementById("debug");
+if(mixer){
 
-function log(...args){
-  console.log(...args);
-  debug.textContent += args.join(" ") + "\n";
-  debug.scrollTop = debug.scrollHeight;
+    mixer.stopAllAction();
+    mixer = null;
+
 }
+
+animationAction = null;
+
+
+    // 参照破棄
+    rotateRoot = null;
+    vrm = null;
+
+
+    console.log("MODEL RESET COMPLETE");
+
+}
+
+
+
+
+
+
+
+async function reloadModel(){
+
+    console.log("RELOAD MODEL");
+
+    isFixed = false;
+    isTracking = true;
+
+
+    await loadVRM(anchor);
+
+
+    await loadVRMA();
+
+
+    modelRoot.visible = true;
+
+
+    setTimeout(()=>{
+
+        fixModel();
+
+    },1500);
+
+}
+
+
+
+
+
+// ===== MindARUI非表示 =====
+function hideMindARUI(){
+
+    document.querySelectorAll(".mindar-ui-overlay")
+    .forEach((el)=>{
+        el.style.setProperty(
+            "display",
+            "none",
+            "important"
+        );
+    });
+
+}
+
+// ===== MindARUI表示 =====
+function showMindARUI(){
+
+    const overlays = document.querySelectorAll(".mindar-ui-overlay");
+
+    overlays.forEach((overlay)=>{
+        overlay.style.setProperty(
+            "display",
+            "block",
+            "important"
+        );
+    });
+
+
+    const scannings = document.querySelectorAll(".mindar-ui-scanning");
+
+    scannings.forEach((scanning)=>{
+        scanning.style.setProperty(
+            "display",
+            "block",
+            "important"
+        );
+    });
+
+    captureBtn.style.display = "block";
+
+}
+
+
+// ===== 操作ボタン表示 =====
+function showARButtons(){
+
+    const buttons = document.querySelector("#arButtons");
+    const captureBtn = document.getElementById("captureBtn");
+
+    if(buttons){
+        buttons.classList.add("show");
+    }
+
+}
+
+
+// ===== メディアシステム =====
+async function capturePhoto(){
+
+  console.log("CAPTURE START");
+
+  const video = mindarThree.video;
+  const canvas = document.createElement("canvas");
+
+  canvas.width = renderer.domElement.width;
+  canvas.height = renderer.domElement.height;
+
+  
+  const ctx = canvas.getContext("2d");
+
+  console.log(
+        "CANVAS",
+        canvas.width,
+        canvas.height
+    );
+
+
+
+  const rect = video.getBoundingClientRect();
+  const scaleX = canvas.width / window.innerWidth;
+  const scaleY = canvas.height / window.innerHeight;
+
+ctx.drawImage(
+    video,
+    rect.x * scaleX,
+    rect.y * scaleY,
+    rect.width * scaleX,
+    rect.height * scaleY
+);
+
+console.log(
+ "AFTER VIDEO DRAW",
+ canvas.toDataURL().slice(0,100)
+);
+
+
+    console.log(
+  "VIDEO RECT",
+  video.getBoundingClientRect()
+);
+/*
+    // カメラ映像
+    ctx.drawImage(
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+*/
+
+/*
+    // VRM描画
+    ctx.drawImage(
+        renderer.domElement,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+*/
+
+    const img = canvas.toDataURL(
+        "image/png"
+    );
+
+console.log(
+    renderer.domElement.toDataURL().slice(0,50)
+);
+
+  console.log(
+    "VIDEO STATE",
+    video.readyState,
+    video.paused,
+    video.currentTime
+);
+
+console.log(
+    "RENDER PNG",
+    renderer.domElement.toDataURL().slice(0,120)
+);
+
+console.log(
+    "RENDER SIZE",
+    renderer.domElement.width,
+    renderer.domElement.height
+);
+
+    window.open(img);
+
+
+}
+
+
+// ===== リセットボタン =====
+resetBtn.onclick = ()=>{
+
+    console.log("RESET REQUEST");
+
+    resetModel();
+
+    needReload = true;
+
+};
+
+
+// ===== ▲ UPボタン =====
+upBtn.onclick = () => {
+  console.log("UP");
+
+const r = upBtn.getBoundingClientRect();
+
+console.log(
+  document.elementFromPoint(
+    r.left + r.width / 2,
+    r.top + r.height / 2
+  )
+);
+
+
+upBtn.addEventListener("pointerdown", ()=>{
+    console.log("UP POINTER");
+});
+
+
+
+  rotateRoot.position.y += 0.05;
+  console.log(modelRoot.position.y);
+  rotateRoot.updateMatrixWorld(true);
+};
+
+// ===== ▼ DOUNボタン =====
+downBtn.onclick = () => {
+  console.log("DOUN");
+
+downBtn.addEventListener("pointerdown", ()=>{
+    console.log("DOWN POINTER");
+});  
+
+  rotateRoot.position.y -= 0.05;
+  console.log(modelRoot.position.y);
+  rotateRoot.updateMatrixWorld(true);
+};
+
+
+
+// ===== 撮影ボタン =====
+captureBtn.onclick = async ()=>{
+    console.log(mindarThree.video);
+    await capturePhoto();
+};

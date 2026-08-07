@@ -288,11 +288,47 @@ text-shadow:0 0 8px black;
 }
 
 
+.mindar-ui-overlay,
+.mindar-ui-scanning {
+    display: none !important;
+}
+
+.mindar-ui-overlay.show,
+.mindar-ui-scanning.show {
+    display: block !important;
+}
 
 
 
 
 
+#arButtons {
+    display: none;
+    
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+
+    flex-direction: column;
+    gap: 10px;
+
+    z-index: 9999;
+}
+
+#arButtons.show {
+    display: flex;
+}
 
 
+#flash{
+    position: fixed;
+    inset: 0;
+    background: white;
 
+    opacity: 0;
+    transition: opacity .08s;
+
+    pointer-events: none;
+
+    z-index: 999999;
+}
