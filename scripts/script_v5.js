@@ -73,6 +73,8 @@ let isMarkerFound = false;
 //VRMが存在する
 let hasModel = false;
 
+let testRender = false;
+
 
 const captureBtn = document.getElementById("captureBtn");
 
@@ -646,7 +648,9 @@ if(rotateRoot){
     rotateRoot.rotation.y = rotationY;
 }
 
-        renderer.render(scene,camera);
+
+renderer.render(scene,camera);
+        
 
     });
 
@@ -874,11 +878,13 @@ async function capturePhoto(){
     );
 
 
-
   const rect = video.getBoundingClientRect();
   const scaleX = canvas.width / window.innerWidth;
   const scaleY = canvas.height / window.innerHeight;
 
+renderer.render(scene, camera);
+
+// カメラ背景
 ctx.drawImage(
     video,
     rect.x * scaleX,
@@ -886,6 +892,17 @@ ctx.drawImage(
     rect.width * scaleX,
     rect.height * scaleY
 );
+
+// VRMを上に重ねる
+ctx.drawImage(
+    renderer.domElement,
+    0,
+    0,
+    canvas.width,
+    canvas.height
+);
+
+
 
 console.log(
  "AFTER VIDEO DRAW",
@@ -897,31 +914,21 @@ console.log(
   "VIDEO RECT",
   video.getBoundingClientRect()
 );
-/*
-    // カメラ映像
-    ctx.drawImage(
-        video,
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
-*/
+
 
 /*
-    // VRM描画
-    ctx.drawImage(
-        renderer.domElement,
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
+const renderImg = renderer.domElement.toDataURL("image/png");
+
+const debugLink = document.createElement("a");
+debugLink.href = renderImg;
+debugLink.download = "debug_renderer.png";
+debugLink.click();
 */
 
-console.log(
-    renderer.domElement.toDataURL().slice(0,50)
-);
+
+
+
+
 
   console.log(
     "VIDEO STATE",
@@ -943,6 +950,10 @@ console.log(
 
     //window.open(img);
 
+console.log(
+ "AFTER VRM DRAW",
+ canvas.toDataURL().slice(0,100)
+);
 
     const img = canvas.toDataURL("image/png");
 
